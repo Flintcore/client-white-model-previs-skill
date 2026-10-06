@@ -172,7 +172,9 @@ class LockedJobContractTests(ContractFixture):
     def test_consistent_job_loads_under_mocked_release(self):
         loaded, root = common.load_job(self.job_path)
         self.assertEqual(loaded["job_id"], team_queue.task_id(loaded["queue_task"]))
-        self.assertEqual(root, self.root)
+        # Windows TEMP can use an 8.3 alias; macOS /var aliases /private/var.
+        # The loader intentionally resolves physical bounded paths.
+        self.assertEqual(root, self.root.resolve())
 
     def test_fps_change_without_queue_spec_is_rejected(self):
         self.job_data["source"]["fps_num"] = 25

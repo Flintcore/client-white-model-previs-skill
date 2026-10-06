@@ -17,7 +17,7 @@
 依赖：Python3.10+、Git；制作机器还需项目选定的Blender和FFmpeg/FFprobe。队列/门禁/安装脚本使用标准库，不依赖当前机器的私人软件路径。真实Blender检查测试基线为5.2，其他版本先跑本机验证。
 
 ```powershell
-git clone --branch v1.0.0 --depth 1 https://github.com/Flintcore/client-white-model-previs-skill.git
+git clone --branch v1.0.1 --depth 1 https://github.com/Flintcore/client-white-model-previs-skill.git
 cd client-white-model-previs-skill
 python -X utf8 tools/install_skill.py
 python -X utf8 tools/install_skill.py --verify
@@ -63,3 +63,5 @@ python -X utf8 -m unittest discover -s tests -p test_blender_check.py -v
 Blender缺席时其测试明确skip；队列单测是本机真实HTTP/SQLite并发和失败情形，不等于跨设备压力验证。脚本通过与客户成片验收仍分开。仓库CI执行可移植测试，生产GPU验证在制作节点上执行。
 
 2026-10-06本地完整实跑 **100/100通过，无skip**：35项真实Blender、26项HTTP/SQLite队列、3项实际媒体时序、36项任务/门禁/安装契约测试。测试边界及原生4K隔离链路见[发布验证记录](docs/validation.md)。
+
+推荐团队固定版本为 **v1.0.1**。此补丁仅修正跨平台测试对临时目录别名的断言（Windows短路径/macOS目录别名），不改123条规则、不改制作/检查/安装代码，也不重写v1.0.0历史；规范版本仍为1.0.0。
