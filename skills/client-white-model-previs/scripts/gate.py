@@ -66,6 +66,7 @@ def verify_bundle(job_path,blender_report,media_report,review_path):
         if v.get(key)!=value:issues.append('Visual review not bound to current '+key)
     reviewer=v.get('reviewer',{}).get('id')
     if not reviewer or reviewer==job['producer'] or v.get('producer')!=job['producer']:issues.append('Producer may not self-approve')
+    if v.get('reviewer',{}).get('kind')!='independent_reviewer':issues.append('Independent reviewer identity required')
     if (v.get('all_frames_reviewed') is not True or v.get('playback_reviewed') is not True or
         v.get('last_second_reviewed') is not True or v.get('reviewed_frame_count')!=job['source']['frame_count']):
         issues.append('Full actual playback/frame coverage/last-second review is missing')
@@ -85,6 +86,9 @@ def verify_bundle(job_path,blender_report,media_report,review_path):
         if status=='not_applicable':
             if not rule.get('conditional') or not row.get('rationale') or not row.get('source_frames'):
                 issues.append(rid+': unsupported applicability exemption')
+            frames=row.get('source_frames',[])
+            if not isinstance(frames,list) or any(type(f) is not int or not 1<=f<=job['source']['frame_count'] for f in frames):
+                issues.append(rid+': applicability evidence must name actual assigned source frames')
         elif status!='pass':issues.append(rid+': failed/unverified')
         if not row.get('observations','').strip():issues.append(rid+': actual observation/evidence absent')
         if set(row.get('shot_ids',[]))!=shot_ids:issues.append(rid+': not reviewed for every assigned shot')
