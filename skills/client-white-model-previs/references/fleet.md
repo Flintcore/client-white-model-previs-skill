@@ -70,7 +70,7 @@ queued ── worker claim ──▶ leased
 git clone REPO_URL client-white-model-previs-skill
 Set-Location client-white-model-previs-skill
 git checkout --detach PINNED_COMMIT
-python -m unittest discover -s tests -v
+python -X utf8 -m unittest discover -s tests -v
 $QueueScript = (Resolve-Path 'skills/client-white-model-previs/scripts/team_queue.py').Path
 ```
 
@@ -79,7 +79,7 @@ $QueueScript = (Resolve-Path 'skills/client-white-model-previs/scripts/team_queu
 git clone REPO_URL client-white-model-previs-skill
 cd client-white-model-previs-skill
 git checkout --detach PINNED_COMMIT
-python3 -m unittest discover -s tests -v
+python3 -X utf8 -m unittest discover -s tests -v
 QUEUE_SCRIPT="$PWD/skills/client-white-model-previs/scripts/team_queue.py"
 ```
 
@@ -90,17 +90,17 @@ QUEUE_SCRIPT="$PWD/skills/client-white-model-previs/scripts/team_queue.py"
 ```powershell
 # 私有本地状态目录，不放进公开仓库或云同步目录。
 $StateDir = Join-Path $HOME '.client-white-model-previs'
-python $QueueScript init-auth --auth-file "$StateDir/auth.json" `
+python -X utf8 $QueueScript init-auth --auth-file "$StateDir/auth.json" `
   --admin coordinator --worker worker-a --worker worker-b --reviewer reviewer-c
-python $QueueScript server --auth-file "$StateDir/auth.json" `
+python -X utf8 $QueueScript server --auth-file "$StateDir/auth.json" `
   --db "$StateDir/queue.sqlite3" --lease-seconds 300
 ```
 
 ```bash
 STATE_DIR="$HOME/.client-white-model-previs"
-python3 "$QUEUE_SCRIPT" init-auth --auth-file "$STATE_DIR/auth.json" \
+python3 -X utf8 "$QUEUE_SCRIPT" init-auth --auth-file "$STATE_DIR/auth.json" \
   --admin coordinator --worker worker-a --worker worker-b --reviewer reviewer-c
-python3 "$QUEUE_SCRIPT" server --auth-file "$STATE_DIR/auth.json" \
+python3 -X utf8 "$QUEUE_SCRIPT" server --auth-file "$STATE_DIR/auth.json" \
   --db "$STATE_DIR/queue.sqlite3" --lease-seconds 300
 ```
 
@@ -127,7 +127,7 @@ queue.example.internal {
 仅在隔离、可信的内网试运行时，可显式启用明文 HTTP，并在防火墙中仅放行团队设备：
 
 ```powershell
-python $QueueScript server --auth-file "$StateDir/auth.json" `
+python -X utf8 $QueueScript server --auth-file "$StateDir/auth.json" `
   --db "$StateDir/queue.sqlite3" --host 0.0.0.0 --allow-insecure-lan
 ```
 
@@ -140,21 +140,21 @@ python $QueueScript server --auth-file "$StateDir/auth.json" `
 ```powershell
 $env:CLIENT_PREVIS_SERVER = 'https://queue.example.internal'
 # 当前进程先装入自己的凭据，管理员身份仅用于 enqueue。
-python $QueueScript enqueue --task 'JOB_DIR/queue_task.json' `
+python -X utf8 $QueueScript enqueue --task 'JOB_DIR/queue_task.json' `
   --retry-key 'stable-submit-request-id' --output 'JOB_DIR/enqueued.json'
 
 # worker 切换为自己的独立凭据；规则 SHA 和 revision 来自锁定的 job.json。
 $Job = Get-Content 'JOB_DIR/job.json' -Raw | ConvertFrom-Json
-python $QueueScript claim --standards-sha256 $Job.standards_sha256 `
+python -X utf8 $QueueScript claim --standards-sha256 $Job.standards_sha256 `
   --skill-revision $Job.skill_revision --job-id $Job.job_id `
   --retry-key 'stable-claim-request-id' --output 'JOB_DIR/lease.json'
 ```
 
 ```bash
 export CLIENT_PREVIS_SERVER='https://queue.example.internal'
-python3 "$QUEUE_SCRIPT" enqueue --task JOB_DIR/queue_task.json \
+python3 -X utf8 "$QUEUE_SCRIPT" enqueue --task JOB_DIR/queue_task.json \
   --retry-key stable-submit-request-id --output JOB_DIR/enqueued.json
-python3 "$QUEUE_SCRIPT" claim --standards-sha256 RULESET_SHA256 \
+python3 -X utf8 "$QUEUE_SCRIPT" claim --standards-sha256 RULESET_SHA256 \
   --skill-revision PINNED_COMMIT --job-id JOB_ID \
   --retry-key stable-claim-request-id --output JOB_DIR/lease.json
 ```
@@ -169,7 +169,7 @@ python3 "$QUEUE_SCRIPT" claim --standards-sha256 RULESET_SHA256 \
 # 独立终端示例；采用自己的 CLIENT_PREVIS_TOKEN，不传 token 给命令行参数。
 while ($true) {
   $RequestKey = [guid]::NewGuid().ToString()
-  python $QueueScript heartbeat --lease 'JOB_DIR/lease.json' --retry-key $RequestKey
+  python -X utf8 $QueueScript heartbeat --lease 'JOB_DIR/lease.json' --retry-key $RequestKey
   if ($LASTEXITCODE -ne 0) { break }
   Start-Sleep -Seconds 60
 }
@@ -177,8 +177,8 @@ while ($true) {
 
 ```bash
 while true; do
-  KEY=$(python3 -c 'import uuid; print(uuid.uuid4())')
-  python3 "$QUEUE_SCRIPT" heartbeat --lease JOB_DIR/lease.json --retry-key "$KEY" || break
+  KEY=$(python3 -X utf8 -c 'import uuid; print(uuid.uuid4())')
+  python3 -X utf8 "$QUEUE_SCRIPT" heartbeat --lease JOB_DIR/lease.json --retry-key "$KEY" || break
   sleep 60
 done
 ```
@@ -192,7 +192,7 @@ done
 本地制作执行完整 gates，保存真正通过的 `gate.json`。它的 schema 是 `client-white-model-gate.v1`；`passed:true`、job/标准/skill pin 和产物 hash 都要匹配当前任务。存在“未确认/待检查/缺证据”的阻断项时，先修复，不提交 complete。
 
 ```powershell
-python $QueueScript complete --lease 'JOB_DIR/lease.json' --gate 'JOB_DIR/gate.json' `
+python -X utf8 $QueueScript complete --lease 'JOB_DIR/lease.json' --gate 'JOB_DIR/gate.json' `
   --report-uri 'https://private-store.example/jobs/JOB_ID/LEASE_ID/gate.json' `
   --artifact-uris 'JOB_DIR/artifact_uris.json' `
   --retry-key 'stable-complete-request-id' --output 'JOB_DIR/completed.json'
@@ -253,7 +253,7 @@ python $QueueScript complete --lease 'JOB_DIR/lease.json' --gate 'JOB_DIR/gate.j
 5. 使用独立身份提交：
 
    ```powershell
-   python $QueueScript review --lease 'review-lease.json' --review 'review-decision.json' `
+   python -X utf8 $QueueScript review --lease 'review-lease.json' --review 'review-decision.json' `
      --retry-key 'stable-review-request-id' --output 'review-result.json'
    ```
 
@@ -262,8 +262,8 @@ python $QueueScript complete --lease 'JOB_DIR/lease.json' --gate 'JOB_DIR/gate.j
 ## 7. 运行、监控与故障恢复
 
 ```powershell
-python $QueueScript status --limit 100
-python $QueueScript status --job-id JOB_ID --output 'JOB_DIR/status.json'
+python -X utf8 $QueueScript status --limit 100
+python -X utf8 $QueueScript status --job-id JOB_ID --output 'JOB_DIR/status.json'
 ```
 
 - status 默认返回最多 100 条，最多 1000 条；`counts` 是整个队列的各状态统计，不把分页返回条数当作全队列总量。
@@ -295,7 +295,7 @@ python $QueueScript status --job-id JOB_ID --output 'JOB_DIR/status.json'
 目前回归包含 26 个合成/本机 localhost 队列测试：真实双客户端 claim、lease expiry、旧提交拒绝、retry idempotency、auth/角色、版本 pin、独立复核、返工、持久化、gate artifact 变更检测、全部 PNG 的删除/篡改/序列/数量/路径边界检查，并通过真实 CLI 子进程验证删帧或改帧会在 HTTP complete 提交前失败、恢复原始帧后只进入 awaiting_review。**尚未做 30,000 分钟负载压测、跨设备长时稳定性验证或该体量甲方内容验收。**
 
 ```powershell
-python -m unittest discover -s tests -p test_team_queue.py -v
+python -X utf8 -m unittest discover -s tests -p test_team_queue.py -v
 ```
 
 这些测试没有读写甲方素材，也不对现有样片工程做修改。

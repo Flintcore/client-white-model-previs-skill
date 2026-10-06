@@ -19,11 +19,13 @@
 ```powershell
 git clone --branch v1.0.0 --depth 1 https://github.com/Flintcore/client-white-model-previs-skill.git
 cd client-white-model-previs-skill
-python tools/install_skill.py
-python tools/install_skill.py --verify
+python -X utf8 tools/install_skill.py
+python -X utf8 tools/install_skill.py --verify
 ```
 
-Linux/macOS 使用同样命令。默认安装到 `$CODEX_HOME/skills/client-white-model-previs` 或 `~/.codex/skills/client-white-model-previs`。更新先切到明确新tag/commit，再用 `python tools/install_skill.py --update`；旧安装自动移至skills外备份，所有新文件hash回读。安装目录不是Git checkout，不对它执行git pull。
+Linux/macOS 使用同样命令。默认安装到 `$CODEX_HOME/skills/client-white-model-previs` 或 `~/.codex/skills/client-white-model-previs`。更新先切到明确新tag/commit，再用 `python -X utf8 tools/install_skill.py --update`；旧安装自动移至skills外备份，所有新文件hash回读。安装目录不是Git checkout，不对它执行git pull。
+
+仓库通过 `.gitattributes` 保留提交字节，避免跨系统换行转换改变规范SHA；所有命令显式启用UTF-8。安装和运行均核对真实提交/完整文件hash，不接受随意填入的版本字符串。
 
 新对话调用：
 
@@ -53,9 +55,11 @@ Linux/macOS 使用同样命令。默认安装到 `$CODEX_HOME/skills/client-whit
 ## 测试
 
 ```powershell
-python -m unittest discover -s tests -v
+python -X utf8 -m unittest discover -s tests -v
 $env:BLENDER_EXE = '本机已确认的Blender可执行路径'
-python -m unittest discover -s tests -p test_blender_check.py -v
+python -X utf8 -m unittest discover -s tests -p test_blender_check.py -v
 ```
 
 Blender缺席时其测试明确skip；队列单测是本机真实HTTP/SQLite并发和失败情形，不等于跨设备压力验证。脚本通过与客户成片验收仍分开。仓库CI执行可移植测试，生产GPU验证在制作节点上执行。
+
+2026-10-06本地完整实跑 **100/100通过，无skip**：35项真实Blender、26项HTTP/SQLite队列、3项实际媒体时序、36项任务/门禁/安装契约测试。测试边界及原生4K隔离链路见[发布验证记录](docs/validation.md)。

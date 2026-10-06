@@ -12,8 +12,8 @@
 
 ```powershell
 $S = Join-Path $HOME '.codex/skills/client-white-model-previs/scripts'
-python "$S/job.py" init --source SOURCE.mp4 --template TEMPLATE.blend --output WORK_JOB --name A --frames 240 --worker-id worker-a --palette-decision '本任务已确认的角色身份色' --dark-scene
-python "$S/media.py" stage --job WORK_JOB/job.json
+python -X utf8 "$S/job.py" init --source SOURCE.mp4 --template TEMPLATE.blend --output WORK_JOB --name A --frames 240 --worker-id worker-a --palette-decision '本任务已确认的角色身份色' --dark-scene
+python -X utf8 "$S/media.py" stage --job WORK_JOB/job.json
 ```
 
 `--frames 240` 只适用于确认24fps的前10秒；整片不传该参数。初始化时实际读源FPS/帧数，不以240套所有视频。默认 `client-4k` 与非4K源片冲突会停止，先确认甲方希望源原生还是新4K规格，再采用相应项目约定；没有放大诊断图的选项。`source-native` 用于有明确源原生约定的其他任务。
@@ -37,11 +37,11 @@ python "$S/media.py" stage --job WORK_JOB/job.json
 把最终候选保存到 `WORK_JOB/delivery/A/A.blend`，参考Movieclip为 `//A.mp4` 或已打包；四文件目录外的绝对路径不能留到客户包。背景UI不需改动；`BLENDER` 是当前确认的可执行程序。
 
 ```powershell
-& $BLENDER --background --disable-autoexec WORK_JOB/delivery/A/A.blend --python-exit-code 1 --python "$S/blender_check.py" -- --job WORK_JOB/job.json --report WORK_JOB/blender-diagnostic.json
-& $BLENDER --background --disable-autoexec WORK_JOB/delivery/A/A.blend --python-exit-code 1 --python "$S/render_native.py" -- --job WORK_JOB/job.json --diagnostic-report WORK_JOB/blender-diagnostic.json --output WORK_JOB/renders-final
-& $BLENDER --background --disable-autoexec WORK_JOB/delivery/A/A.blend --python-exit-code 1 --python "$S/blender_check.py" -- --job WORK_JOB/job.json --report WORK_JOB/blender-final.json --renders WORK_JOB/renders-final
-python "$S/media.py" encode --job WORK_JOB/job.json --blend WORK_JOB/delivery/A/A.blend --renders WORK_JOB/renders-final --blender-report WORK_JOB/blender-final.json --report WORK_JOB/media.json
-python "$S/job.py" review-template --job WORK_JOB/job.json --reviewer reviewer-b --output WORK_JOB/visual-review.json
+& $BLENDER --background --disable-autoexec WORK_JOB/delivery/A/A.blend --python-exit-code 1 --python -X utf8 "$S/blender_check.py" -- --job WORK_JOB/job.json --report WORK_JOB/blender-diagnostic.json
+& $BLENDER --background --disable-autoexec WORK_JOB/delivery/A/A.blend --python-exit-code 1 --python -X utf8 "$S/render_native.py" -- --job WORK_JOB/job.json --diagnostic-report WORK_JOB/blender-diagnostic.json --output WORK_JOB/renders-final
+& $BLENDER --background --disable-autoexec WORK_JOB/delivery/A/A.blend --python-exit-code 1 --python -X utf8 "$S/blender_check.py" -- --job WORK_JOB/job.json --report WORK_JOB/blender-final.json --renders WORK_JOB/renders-final
+python -X utf8 "$S/media.py" encode --job WORK_JOB/job.json --blend WORK_JOB/delivery/A/A.blend --renders WORK_JOB/renders-final --blender-report WORK_JOB/blender-final.json --report WORK_JOB/media.json
+python -X utf8 "$S/job.py" review-template --job WORK_JOB/job.json --reviewer reviewer-b --output WORK_JOB/visual-review.json
 ```
 
 命令参数通过CLI解析，含空格路径正确引用。Linux/macOS 使用相同 Python脚本和 Blender参数列表。Blender版本、FFmpeg、设备性能现场核实，批次固定版本；本发布真实测试的是 Blender5.2。其余版本即使API兼容也先做本机 smoke。没有Blender/FFmpeg时保留任务和具体缺项，不虚构渲染。
@@ -49,8 +49,8 @@ python "$S/job.py" review-template --job WORK_JOB/job.json --reviewer reviewer-b
 最终 reviewer 审完整播放、逐帧覆盖和所有关键动作/遮挡边界/切镜前后/末秒，按每规则与每镜头记录。技术自动结果可作为对应规则证据，视觉结论仍需实际审查。未过项开返修版本，失效旧scene/media/review hash，复查通过再封装。
 
 ```powershell
-python "$S/gate.py" check --job WORK_JOB/job.json --blender-report WORK_JOB/blender-final.json --media-report WORK_JOB/media.json --review WORK_JOB/visual-review.json --output WORK_JOB/gate.json
-python "$S/gate.py" package --job WORK_JOB/job.json --blender-report WORK_JOB/blender-final.json --media-report WORK_JOB/media.json --review WORK_JOB/visual-review.json --output WORK_JOB/gate.json
+python -X utf8 "$S/gate.py" check --job WORK_JOB/job.json --blender-report WORK_JOB/blender-final.json --media-report WORK_JOB/media.json --review WORK_JOB/visual-review.json --output WORK_JOB/gate.json
+python -X utf8 "$S/gate.py" package --job WORK_JOB/job.json --blender-report WORK_JOB/blender-final.json --media-report WORK_JOB/media.json --review WORK_JOB/visual-review.json --output WORK_JOB/gate.json
 ```
 
 ## 工程阈值和业务口径

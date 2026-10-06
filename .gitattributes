@@ -1,0 +1,3 @@
+# Rules, receipts and installed file hashes must match across every device.
+# Preserve committed bytes even when a member has core.autocrlf=true.
+* -text
