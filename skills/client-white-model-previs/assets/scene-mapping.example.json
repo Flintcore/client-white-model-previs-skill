@@ -1,0 +1,21 @@
+{
+  "schema": "client-white-model-scene-mapping.example.v1",
+  "example_not_actual_scene": true,
+  "profile": "client-human-10parts",
+  "scene": {
+    "shots": [{"id": "shot_001", "start": 1, "end": 240}],
+    "actors": [{
+      "id": "role_a",
+      "armature": "RIG_ROLE_A",
+      "parts": {"head": "ROLE_A_HEAD", "torso": "ROLE_A_TORSO", "upper_arm_l": "ROLE_A_UPPER_ARM_L", "forearm_l": "ROLE_A_FOREARM_L", "upper_arm_r": "ROLE_A_UPPER_ARM_R", "forearm_r": "ROLE_A_FOREARM_R", "thigh_l": "ROLE_A_THIGH_L", "shin_l": "ROLE_A_SHIN_L", "thigh_r": "ROLE_A_THIGH_R", "shin_r": "ROLE_A_SHIN_R"},
+      "part_bones": {"shin_l": "Shin_L", "shin_r": "Shin_R"},
+      "foot_probes": {"L": {"object": "ROLE_A_SHIN_L", "vertex_indices": [0, 2, 4, 6]}, "R": {"object": "ROLE_A_SHIN_R", "vertex_indices": [0, 2, 4, 6]}},
+      "gait": [{"frame": 1, "stance": ["L"], "evidence": "inferred"}]
+    }],
+    "support_objects": ["ENV_GROUND"],
+    "production_objects": ["ENV_GROUND"],
+    "excluded_source_objects": [],
+    "approved_visibility_exceptions": []
+  },
+  "notes": "Replace names/indices with inspected actual objects and true distal shin/foot-cap vertices. Populate every actor/frame gait record and every real part-bone binding. The one-frame row and example shot length are not a production pass. Non-humanoid profiles require a matching explicit geometry/contact checker, never silently reuse this ten-part definition."
+}

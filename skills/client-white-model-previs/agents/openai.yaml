@@ -1,0 +1,4 @@
+interface:
+  display_name: "甲方白模复刻标准执行"
+  short_description: "按甲方标准制作与验收白模视频，统一多设备团队的逐帧检查和交付门禁"
+  default_prompt: "使用 $client-white-model-previs 按锁定的甲方规范处理当前视频，先查现有状态，逐项验证后再交付。"
