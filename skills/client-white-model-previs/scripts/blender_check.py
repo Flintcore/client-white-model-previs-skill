@@ -27,6 +27,9 @@ import struct
 import sys
 import zlib
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from common import validate_render_contract, raytracing_matches, delivery_dimensions
+
 import bpy
 from mathutils import Vector
 from mathutils.bvhtree import BVHTree
@@ -346,8 +349,17 @@ class Checker:
         dimensions = (scene.render.resolution_x, scene.render.resolution_y, scene.render.resolution_percentage)
         native = (source.get("width"), source.get("height"), 100)
         requested = (render.get("width"), render.get("height"), render.get("percentage"))
-        self.add("native_resolution_100_percent", dimensions == native == requested,
-                 {"saved": dimensions, "source": native, "requested": requested})
+        profile = job.get('profile', 'source-native')
+        try:
+            validate_render_contract(render, source, profile)
+            resolution_valid = dimensions == requested
+            resolution_error = None
+        except (ValueError, KeyError, TypeError) as error:
+            resolution_valid = False
+            resolution_error = str(error)
+        self.add("native_resolution_100_percent", resolution_valid,
+                 {"saved": dimensions, "source": native, "requested": requested,
+                  "profile": profile, "error": resolution_error})
         try:
             # Blender stores fps_base as float32 (1.001 is read back as
             # 1.0010000467...). Recover its ordinary rational representation
@@ -374,8 +386,9 @@ class Checker:
         self.add("eevee_exact_64_samples", engine in {"BLENDER_EEVEE", "BLENDER_EEVEE_NEXT"} and samples == required == 64,
                  {"engine": engine, "saved_samples": samples, "requested_samples": required})
         dark = render.get("dark_scene")
-        self.add("dark_scene_raytracing", isinstance(dark, bool) and (not dark or raytrace is True),
-                 {"dark_scene": dark, "saved_raytracing": raytrace, "unsupported_api_is_not_a_pass": True})
+        self.add("dark_scene_raytracing", raytracing_matches(render, raytrace, profile),
+                 {"dark_scene": dark, "saved_raytracing": raytrace, "profile": profile,
+                  "required_disabled": profile == 'client-4k-project-1080p', "unsupported_api_is_not_a_pass": True})
         rows = dependencies(scene)
         self.add("portable_external_dependencies", all(row["portable"] and row["exists"] for row in rows), {"dependencies": rows})
         self.final_bundle_dependencies(rows)
@@ -718,8 +731,8 @@ class Checker:
             path = self.renders / ("frame_%04d.png" % frame)
             try:
                 row = png_information(path)
-                if (row["width"], row["height"]) != (source["width"], source["height"]):
-                    raise ValueError("Rendered dimensions are not source native")
+                if (row["width"], row["height"]) != delivery_dimensions(spec):
+                    raise ValueError("Rendered dimensions differ from locked native delivery")
                 frames.append({"frame": frame, **row})
             except (OSError, ValueError) as error:
                 errors.append({"frame": frame, "error": str(error)})
@@ -730,12 +743,16 @@ class Checker:
             expected = {"schema": "client-white-model-render.v1", "status": "COMPLETE",
                         "executed_with": "Blender bpy actual renderer", "upscaled": False,
                         "job_id": self.job["job_id"], "blend_sha256": self.before_hash,
-                        "standards_sha256": self.job["standards_sha256"], "width": source["width"],
-                        "height": source["height"], "resolution_percentage": 100, "samples": spec["samples"],
+                        "standards_sha256": self.job["standards_sha256"], "width": delivery_dimensions(spec)[0],
+                        "height": delivery_dimensions(spec)[1], "resolution_percentage": 100, "samples": spec["samples"],
                         "fps_num": source["fps_num"], "fps_den": source["fps_den"],
                         "frame_start": timeline["frame_start"], "frame_end": timeline["frame_end"],
                         "engine": self.scene.render.engine, "dark_scene": spec["dark_scene"]}
-            if spec["dark_scene"]:
+            if self.job.get('profile') == 'client-4k-project-1080p':
+                expected['raytracing'] = False
+                expected['saved_project_width'] = spec['width']
+                expected['saved_project_height'] = spec['height']
+            elif spec["dark_scene"]:
                 expected["raytracing"] = True
             mismatches = {key: {"expected": value, "actual": manifest.get(key)} for key, value in expected.items() if manifest.get(key) != value}
             completed = manifest.get("completed", [])

@@ -12,15 +12,18 @@ def delivery_root(job,root):
 def verify_native(job,blend,renders):
     manifest_path=Path(renders)/'render_manifest.json';m=read_json(manifest_path)
     t=job['timeline'];r=job['render'];s=job['source'];expected=list(range(t['frame_start'],t['frame_end']+1))
+    width,height=delivery_dimensions(r)
     if (m.get('schema')!='client-white-model-render.v1' or m.get('status')!='COMPLETE' or m.get('job_id')!=job['job_id'] or
         m.get('skill_revision')!=job['skill_revision'] or
         m.get('standards_sha256')!=job['standards_sha256'] or m.get('blend_sha256')!=sha256(blend)):
         raise ValueError('Native render manifest not bound to this actual job/scene')
-    for key,value in {'width':r['width'],'height':r['height'],'resolution_percentage':100,'samples':64,
+    for key,value in {'width':width,'height':height,'resolution_percentage':100,'samples':64,
                       'frame_start':t['frame_start'],'frame_end':t['frame_end'],
                       'fps_num':s['fps_num'],'fps_den':s['fps_den'],'upscaled':False}.items():
         if m.get(key)!=value:raise ValueError('Native manifest field differs: '+key)
-    if m.get('engine') not in ['BLENDER_EEVEE','BLENDER_EEVEE_NEXT'] or (r['dark_scene'] and not m.get('raytracing')):
+    if job['profile']=='client-4k-project-1080p' and (m.get('saved_project_width'),m.get('saved_project_height'))!=(r['width'],r['height']):
+        raise ValueError('Saved 4K project provenance differs')
+    if m.get('engine') not in ['BLENDER_EEVEE','BLENDER_EEVEE_NEXT'] or not raytracing_matches(r,m.get('raytracing'),job['profile']):
         raise ValueError('Engine/ray tracing evidence mismatch')
     rows=m.get('completed',[])
     if [x['frame'] for x in rows]!=expected:raise ValueError('Native frame evidence incomplete/duplicated')
@@ -28,10 +31,10 @@ def verify_native(job,blend,renders):
     if [x.name for x in files]!=[f'frame_{i:04d}.png' for i in expected]:raise ValueError('Actual native frame set differs')
     for row,file in zip(rows,files):
         with open(file,'rb') as f:header=f.read(24)
-        if header[:8]!=b'\x89PNG\r\n\x1a\n' or struct.unpack('>II',header[16:24])!=(r['width'],r['height']):
+        if header[:8]!=b'\x89PNG\r\n\x1a\n' or struct.unpack('>II',header[16:24])!=(width,height):
             raise ValueError('Actual PNG is not native size: '+str(file))
         if row.get('path')!=file.name or row.get('sha256')!=sha256(file):raise ValueError('Native frame identity differs')
-        if (row.get('width'),row.get('height'))!=(r['width'],r['height']):raise ValueError('Native row dimensions differ')
+        if (row.get('width'),row.get('height'))!=(width,height):raise ValueError('Native row dimensions differ')
     return artifact(manifest_path,'renders')
 
 def audio_hashes(path,ffprobe):
@@ -72,13 +75,16 @@ def encode(args):
     run([args.ffmpeg,'-hide_banner','-v','error','-y','-framerate',fps,'-start_number',job['timeline']['frame_start'],
          '-i',Path(args.renders)/'frame_%04d.png','-i',original,'-map','0:v:0','-map','1:a?',
          *common,'-c:a','copy',white])
+    r=job['render']
+    width,height=delivery_dimensions(r)
+    top_scale=f",scale={width}:{height}:flags=lanczos" if (s['width'],s['height'])!=(width,height) else ''
     run([args.ffmpeg,'-hide_banner','-v','error','-y','-i',original,'-i',white,
-         '-filter_complex','[0:v]setpts=PTS-STARTPTS,setsar=1[top];[1:v]setpts=PTS-STARTPTS,setsar=1[bottom];[top][bottom]vstack=inputs=2[v]',
+         '-filter_complex',f'[0:v]setpts=PTS-STARTPTS{top_scale},setsar=1[top];[1:v]setpts=PTS-STARTPTS,setsar=1[bottom];[top][bottom]vstack=inputs=2[v]',
          '-map','[v]','-map','0:a?',*common,'-c:a','copy',comparison])
     results=[];source_audio=audio_hashes(original,args.ffprobe)
-    for path,height,kind in [(original,s['height'],'original'),(white,s['height'],'white'),(comparison,s['height']*2,'comparison')]:
+    for path,width,height,kind in [(original,s['width'],s['height'],'original'),(white,width,height,'white'),(comparison,width,height*2,'comparison')]:
         q=video_info(path,args.ffprobe)
-        if (q['width'],q['height'],q['fps_num'],q['fps_den'],q['frame_count'],q['codec'])!=(s['width'],height,s['fps_num'],s['fps_den'],n,'h264'):
+        if (q['width'],q['height'],q['fps_num'],q['fps_den'],q['frame_count'],q['codec'])!=(width,height,s['fps_num'],s['fps_den'],n,'h264'):
             raise ValueError('Encoded media spec differs: '+str(path))
         full_decode(path,args.ffmpeg)
         # Relative audio stream indices vary with remuxing; payload and timing must not.

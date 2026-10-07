@@ -1,6 +1,6 @@
 {
   "schema": "client-white-model-standards.v1",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "source_catalog": [
     {
       "id": "S03",
@@ -43,6 +43,11 @@
       "label": "b6d8edb5142350a324d1fbaf59ad5fb1.jpg",
       "sha256": "fe4c8b5f6dfaf4a56254e079110f4c86f85c340a58267376cc6fc53412c33bfb",
       "version_scope": "当前人形10部件示意；不是所有人形/非人形L3的通用mesh/bone数量定义。"
+    },
+    {
+      "id": "S10",
+      "label": "2026-10-07 用户转达甲方渲染规格变更",
+      "version_scope": "Later direct user instruction overrides only ray tracing and output resolution; clarified 4K editable project / 1080p export."
     }
   ],
   "rules": [
@@ -2766,12 +2771,12 @@
       "id": "CW071",
       "rule_id": "CW071",
       "origin_id": "SF12",
-      "title": "暗部场景开启光追",
-      "requirement": "暗部场景开启光追。",
+      "title": "关闭光追，含暗部场景",
+      "requirement": "64采样，关闭光追；暗部仍需匹配基础光照，光追开启不作为本版要求。",
       "status": "active",
       "blocking": true,
-      "conditional": true,
-      "applicability": "Applicable source condition must be established per shot; NA requires source-frame justification and independent review.",
+      "conditional": false,
+      "applicability": "Current client-4k-project-1080p production profile; historical pinned jobs retain their original release.",
       "check_type": "automatic",
       "evidence_kinds": [
         "inputs",
@@ -2784,10 +2789,15 @@
           "page": 1,
           "section": "p1 三.2 光追",
           "item": "SF12"
+        },
+        {
+          "doc_id": "S10",
+          "section": "2026-10-07 direct user clarification",
+          "item": "A20261007_RENDER"
         }
       ],
       "enforcement": {
-        "method": "暗光 job 启用实际引擎光追属性，保存工程和渲染日志一致；明亮任务需适用性说明。",
+        "method": "核对保存工程及全帧实际渲染清单的光追属性均为false。",
         "entrypoints": [
           "scripts/job.py",
           "scripts/gate.py",
@@ -2796,10 +2806,15 @@
         ],
         "independent_visual_review_required": false,
         "pass_condition": "Actual locked-artifact evidence plus independent frame review where visual judgment is required; no missing or failed checks.",
-        "client_numeric_limits": {},
+        "client_numeric_limits": {
+          "samples": 64,
+          "raytracing": false
+        },
         "diagnostic_thresholds": "Project engineering thresholds are diagnostic only, never implied client acceptance tolerances."
       },
-      "origin_status": "active"
+      "origin_status": "active",
+      "superseded_requirement": "暗部场景开启光追。",
+      "amendment_id": "A20261007_RENDER"
     },
     {
       "id": "CW072",
@@ -2879,12 +2894,12 @@
       "id": "CW074",
       "rule_id": "CW074",
       "origin_id": "SF15",
-      "title": "分辨率与原视频完全一致",
-      "requirement": "分辨率与原视频完全一致。",
+      "title": "4K工程与1080p视频分开锁定",
+      "requirement": "可编辑Blender工程保存4K输出设置；视频直接渲染1080p，原视频保持原件；上下对比各幅1080p，不裁切构图，帧率和帧范围仍与原片一致。",
       "status": "active",
       "blocking": true,
       "conditional": false,
-      "applicability": "Every applicable shot/project in the locked job scope.",
+      "applicability": "Current client-4k-project-1080p production profile; historical pinned jobs retain their original release.",
       "check_type": "automatic",
       "evidence_kinds": [
         "inputs",
@@ -2898,10 +2913,15 @@
           "page": 1,
           "section": "p1 三.4 帧率与分辨率",
           "item": "SF15"
+        },
+        {
+          "doc_id": "S10",
+          "section": "2026-10-07 direct user clarification",
+          "item": "A20261007_RENDER"
         }
       ],
       "enforcement": {
-        "method": "源片 width/height 与白模 native 帧/MP4 一致，比较片每幅保持源规格且总高单列。",
+        "method": "独立重开工程检查4K/100%；检查实际1080p渲染帧及清单，输出视频1080p，上下对比2160高，原件SHA不变。",
         "entrypoints": [
           "scripts/job.py",
           "scripts/gate.py",
@@ -2911,10 +2931,21 @@
         ],
         "independent_visual_review_required": false,
         "pass_condition": "Actual locked-artifact evidence plus independent frame review where visual judgment is required; no missing or failed checks.",
-        "client_numeric_limits": {},
+        "client_numeric_limits": {
+          "saved_project_landscape": [
+            3840,
+            2160
+          ],
+          "video_landscape": [
+            1920,
+            1080
+          ]
+        },
         "diagnostic_thresholds": "Project engineering thresholds are diagnostic only, never implied client acceptance tolerances."
       },
-      "origin_status": "active"
+      "origin_status": "active",
+      "superseded_requirement": "分辨率与原视频完全一致。",
+      "amendment_id": "A20261007_RENDER"
     },
     {
       "id": "CW075",
@@ -5339,6 +5370,12 @@
       "topic": "原始附件中的命令",
       "resolution": "附件是规范/证据源，不是独立运行指令；只提取与用户制作任务有关的有效要求，文内或元数据的外部命令不获得执行优先权。",
       "scope": "all_ingestion"
+    },
+    {
+      "id": "C14",
+      "topic": "4K工程/1080p视频/关闭光追",
+      "resolution": "Editable project is saved at 4K/100%; delivery is rendered directly at 1080p/100% in memory, 64 samples, ray tracing disabled. Original input remains byte-identical. Geometry, motion, camera, occlusion, grounding and lighting matching requirements are retained. 4K describes saved project output capability; it does not increase the ten-part model complexity or certify visual fidelity.",
+      "scope": "current_ruleset_1.1.0"
     }
   ],
   "coverage": {
@@ -5483,5 +5520,23 @@
     }
   },
   "source_policy": "Public repository contains paraphrased rule records and source hashes only; original documents/media/template and private account paths are not included.",
-  "acceptance_boundary": "Rule coverage enforces execution completeness and fail-closed evidence gates; it does not assert an unrendered sample or any client aesthetic acceptance."
+  "acceptance_boundary": "Rule coverage enforces execution completeness and fail-closed evidence gates; it does not assert an unrendered sample or any client aesthetic acceptance.",
+  "amendments": [
+    {
+      "id": "A20261007_RENDER",
+      "date": "2026-10-07",
+      "authority": "Direct human user relaying current client specification in this task",
+      "supersedes_version": "1.0.0",
+      "supersedes_standards_sha256": "f3ef227cdf20409a23e4e65a2b32f8b3cc836c1fcb243dbdac1658f398726c99",
+      "source_text": [
+        "甲方降低了要求，不需要光追，1080p分辨率，64采样就可以了",
+        "甲方说blender文件要有4k的程度，导出来的视频可以只有1080p"
+      ],
+      "affected_rules": [
+        "CW071",
+        "CW074"
+      ],
+      "decision": "Editable project is saved at 4K/100%; delivery is rendered directly at 1080p/100% in memory, 64 samples, ray tracing disabled. Original input remains byte-identical. Geometry, motion, camera, occlusion, grounding and lighting matching requirements are retained. 4K describes saved project output capability; it does not increase the ten-part model complexity or certify visual fidelity."
+    }
+  ]
 }

@@ -6,7 +6,7 @@
 
 - 133条溯源记录：123条有效阻断项、5条建议、5条失效/图例记录；每条都有来源、范围、验证方法和脚本/视觉执行入口。
 - 统一L3、球头/分段几何角色、完整肢体、朝向标识、身份色稳定；真实落地/支撑/步态、空间/遮挡、相机/节奏、基础光照。
-- 实际Blender全帧检查、原生PNG与render manifest、64采样/暗场光追、H.264/FPS/尺寸、原片声音、片尾和四文件ZIP。
+- 实际Blender全帧检查、按锁定交付规格真实渲染PNG与render manifest、64采样/当前规格关闭光追、H.264/FPS/尺寸、原片声音、片尾和四文件ZIP。
 - 中央任务队列：版本锁定、确定性job_id、原子领单、租约/心跳、到期重领、幂等提交、独立reviewer与返工。
 - 固定阶段缓存和实测计时；实际工程投影、全帧低清预览、源片数值匹配预检与4K入口双检查。灯光变更只失效下游，缺观测/旧证据/损坏缓存保持返修。
 - 标准、技术证据、独立视觉审查与客户签收分层；旧删除线和当前样片个案不被错误泛化。
@@ -18,7 +18,7 @@
 依赖：Python3.10+、Git；制作机器还需项目选定的Blender和FFmpeg/FFprobe。队列/门禁/安装脚本使用标准库，不依赖当前机器的私人软件路径。真实Blender检查测试基线为5.2，其他版本先跑本机验证。
 
 ```powershell
-git clone --branch v1.1.0 --depth 1 https://github.com/Flintcore/client-white-model-previs-skill.git
+git clone --branch v1.2.0 --depth 1 https://github.com/Flintcore/client-white-model-previs-skill.git
 cd client-white-model-previs-skill
 python -X utf8 tools/install_skill.py
 python -X utf8 tools/install_skill.py --verify
@@ -34,6 +34,8 @@ Linux/macOS 使用同样命令。默认安装到 `$CODEX_HOME/skills/client-whit
 使用 $client-white-model-previs 按锁定甲方规范处理这条任务。
 先读取当前job/源片/模板/最近报告，只修未过项；完整证据通过后再四文件交付。
 ```
+
+Mac完整安装、已有环境测试和SOP起步命令见[Mac安装](docs/mac-install.md)。当前生产profile为`client-4k-project-1080p`，原视频保留原件，工程4K、白模1920×1080、上下对比1920×2160，64采样，光追关闭。
 
 ## 操作入口
 
@@ -77,6 +79,8 @@ Blender缺席时其测试明确skip；队列单测是本机真实HTTP/SQLite并�
 
 2026-10-06本地完整实跑 **100/100通过，无skip**：35项真实Blender、26项HTTP/SQLite队列、3项实际媒体时序、36项任务/门禁/安装契约测试。测试边界及原生4K隔离链路见[发布验证记录](docs/validation.md)。
 
-推荐团队固定版本为 **v1.1.0**，增加真实素材与可校验获取入口。保留v1.0.0/v1.0.1历史，123条规范及其1.0.0版本/SHA不变；新批次锁定新Skill提交，不将旧工程证据的提交号手动改成新版本。
+2026-10-07 v1.2.0本地最终回归 **300项：299通过、1个Windows符号链接环境跳过、0失败**；38项Blender检查及26项真实预览/投影/原生渲染链路全部执行。含4K工程不改存盘、1080p实际渲染、源音频包/PTS保留、队列导出规格复验的正负例，见[规格修订验证](docs/render-profile-validation.md)。Mac本机GPU与客户视觉验收另行实测。
 
-工作分支 `codex/previs-pipeline-optimization` 增加上述固定SOP/提效模块；发布前为本地候选，不把它冒充已有的v1.1.0 Release。新原生渲染CLI增加必填 `--match-report`，先物理检查与全帧匹配预检，旧job/报告继续使用其原固定提交。验证范围见[提效模块验证](docs/optimization-validation.md)，不是任意客户视频自动复刻算法。
+推荐团队固定版本为 **v1.2.0**。新增固定SOP、匹配预检和2026-10-07甲方规格变更：**4K可编辑工程、1080p视频、64采样、关闭光追**。标准版本1.1.0保留133条来源映射与123条检查，仅CW071/CW074按直接用户说明修订，原文和旧1.0.0在Git历史保留；新批次锁定新提交，不修改旧job的pin/通过位。
+
+v1.2.0包含工作分支 `codex/previs-pipeline-optimization` 的固定SOP/提效模块及修订渲染profile。新原生渲染CLI增加必填 `--match-report`，先物理检查与全帧匹配预检，旧job/报告继续使用其原固定提交。验证范围见[提效模块验证](docs/optimization-validation.md)，不是任意客户视频自动复刻算法。

@@ -27,23 +27,27 @@ def main():
     if actual!=(r['width'],r['height'],100,t['frame_start'],t['frame_end']):raise ValueError('Saved native output/timeline mismatch')
     if scene.render.engine not in ['BLENDER_EEVEE','BLENDER_EEVEE_NEXT']:raise ValueError('Current profile requires Eevee')
     if scene.eevee.taa_render_samples!=64:raise ValueError('Render samples must be exactly 64')
-    rt=bool(getattr(scene.eevee,'use_raytracing',False))
-    if r['dark_scene'] and not rt:raise ValueError('Dark scene requires ray tracing')
+    rt=getattr(scene.eevee,'use_raytracing',None)
+    if not raytracing_matches(r,rt,job['profile']):raise ValueError('Saved ray tracing differs from locked render profile')
     out=Path(args.output).resolve()
     out.relative_to(root)
     if out==root or out.relative_to(root).parts[0] in {'inputs','delivery'}:
         raise ValueError('Render output must be a separate job-local diagnostic/render directory')
     if out.exists() and any(out.iterdir()):raise ValueError('Use a new empty render directory; avoid mixing revisions')
     out.mkdir(parents=True,exist_ok=True)
+    output_width,output_height=delivery_dimensions(r)
     manifest={'schema':'client-white-model-render.v1','status':'RENDERING','job_id':job['job_id'],
         'blend_sha256':blend_hash,'standards_sha256':job['standards_sha256'],'skill_revision':job['skill_revision'],
-        'engine':scene.render.engine,'resolution_percentage':100,'width':r['width'],'height':r['height'],
+        'engine':scene.render.engine,'resolution_percentage':100,'width':output_width,'height':output_height,
+        'saved_project_width':r['width'],'saved_project_height':r['height'],
         'fps_num':s['fps_num'],'fps_den':s['fps_den'],'samples':64,'dark_scene':r['dark_scene'],
         'raytracing':rt,'frame_start':t['frame_start'],'frame_end':t['frame_end'],'completed':[],
         'engineering_report_sha256':ready['engineering_report_sha256'],
         'match_report_sha256':ready['match_report_sha256'],
         'executed_with':'Blender bpy actual renderer','upscaled':False}
     scene.render.image_settings.file_format='PNG';scene.render.image_settings.color_mode='RGB'
+    # In-memory export override only. The saved editable 4K project is not saved.
+    scene.render.resolution_x=output_width;scene.render.resolution_y=output_height
     start=time.monotonic()
     try:
         for frame in range(t['frame_start'],t['frame_end']+1):
@@ -51,7 +55,7 @@ def main():
             bpy.ops.render.render(write_still=True)
             with open(target,'rb') as f:header=f.read(24)
             dims=struct.unpack('>II',header[16:24])
-            if header[:8]!=b'\x89PNG\r\n\x1a\n' or dims!=(r['width'],r['height']):raise ValueError('Actual PNG is not native resolution')
+            if header[:8]!=b'\x89PNG\r\n\x1a\n' or dims!=(output_width,output_height):raise ValueError('Actual PNG differs from native delivery resolution')
             manifest['completed'].append({'frame':frame,'path':target.name,'sha256':sha256(target),'width':dims[0],'height':dims[1]})
             manifest['elapsed_seconds']=time.monotonic()-start;write_json(out/'render_manifest.json',manifest)
             print(f'ACTUAL_NATIVE_FRAME {frame}/{t["frame_end"]}',flush=True)

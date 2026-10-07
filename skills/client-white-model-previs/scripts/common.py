@@ -5,7 +5,44 @@ from pathlib import Path
 
 SKILL_ROOT=Path(__file__).resolve().parents[1]
 RULES_PATH=SKILL_ROOT/'references'/'standards.json'
-VERSION='1.0.0'
+VERSION='1.1.0'
+
+
+def validate_render_contract(render, source, profile):
+    """Keep input pixels separate from the explicitly revised delivery pixels."""
+    if render.get('percentage') != 100 or render.get('samples') != 64:
+        raise ValueError('100 percent and exactly 64 samples are mandatory')
+    if not isinstance(render.get('dark_scene'), bool):
+        raise ValueError('Explicit dark-scene classification required')
+    if profile == 'client-4k-project-1080p':
+        dimensions = (2160, 3840) if source['height'] > source['width'] else (3840, 2160)
+        output = (1080, 1920) if source['height'] > source['width'] else (1920, 1080)
+        if (render.get('width'), render.get('height')) != dimensions:
+            raise ValueError('Current client profile requires saved 4K project dimensions')
+        if (render.get('output_width'), render.get('output_height')) != output:
+            raise ValueError('Current client profile requires native 1080p video dimensions')
+        if render.get('raytracing') is not False:
+            raise ValueError('Current client profile requires ray tracing disabled')
+        if source['width'] * dimensions[1] != source['height'] * dimensions[0]:
+            raise ValueError('Source aspect ratio differs; resolve framing before conversion')
+    elif profile in {'client-4k', 'source-native'}:
+        if (render.get('width'), render.get('height')) != (source['width'], source['height']):
+            raise ValueError('Legacy native reference dimensions are mandatory')
+        if profile == 'client-4k' and sorted([source['width'], source['height']]) != [2160, 3840]:
+            raise ValueError('4K/native source conflict')
+    else:
+        raise ValueError('Unknown source profile')
+
+
+def raytracing_matches(render, saved, profile):
+    """False is an explicit current setting, not a missing/unsupported property."""
+    if profile == 'client-4k-project-1080p':
+        return render.get('raytracing') is False and saved is False
+    return isinstance(render.get('dark_scene'), bool) and (not render['dark_scene'] or saved is True)
+
+
+def delivery_dimensions(render):
+    return render.get('output_width', render['width']), render.get('output_height', render['height'])
 
 def read_json(path):
     return json.loads(Path(path).read_text(encoding='utf-8-sig'))
@@ -106,8 +143,7 @@ def load_job(path,check_inputs=True):
     if not re.fullmatch('[0-9a-f]{64}',job.get('job_id','')):raise ValueError('Missing deterministic job identity')
     if job['template'].get('level')!='L3':raise ValueError('Current client requires uniform L3')
     r=job['render'];s=job['source'];t=job['timeline']
-    if (r['width'],r['height'])!=(s['width'],s['height']) or r['percentage']!=100 or r['samples']!=64:
-        raise ValueError('Native reference dimensions, 100 percent and 64 samples are mandatory')
+    validate_render_contract(r,s,job['profile'])
     if t['frame_start']!=1 or t['frame_end']!=s['frame_count']:raise ValueError('Assigned reference clip and timeline differ')
     from team_queue import task_id
     q=job['queue_task']
@@ -118,8 +154,6 @@ def load_job(path,check_inputs=True):
                       'palette_decision':job['palette_decision'],'uniform_character_level':job['template']['level']},
               'timeline':t}
     if any(q.get(k)!=value for k,value in expected.items()):raise ValueError('Job input/spec differs from its immutable queue task')
-    if job['profile']=='client-4k' and sorted([s['width'],s['height']])!=[2160,3840]:raise ValueError('4K/native source conflict')
-    if job['profile'] not in ['client-4k','source-native']:raise ValueError('Unknown source profile')
     name=job['project_name']
     if not re.fullmatch(r'[\w.-]+',name,flags=re.UNICODE) or name in ['.','..']:raise ValueError('Simple delivery base name required')
     if check_inputs:

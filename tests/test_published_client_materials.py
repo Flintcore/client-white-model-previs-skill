@@ -29,7 +29,7 @@ class PublishedMaterialTests(unittest.TestCase):
 
     def test_frozen_rules_sha_and_current_source_template_are_explicit(self):
         self.assertEqual(self.manifest['standards_sha256'],helper.file_digest(SKILL/'references/standards.json')[0])
-        self.assertEqual(self.manifest['standards_version'],'1.0.0')
+        self.assertEqual(self.manifest['standards_version'],'1.1.0')
         self.assertEqual(self.manifest['default_template_id'],'person-template')
         self.assertEqual(self.manifest['default_source_id'],'0927-01')
         self.assertEqual(self.manifest['default_sample']['frames'],240)

@@ -59,6 +59,11 @@ def main():
     scene.render.resolution_x = 3840
     scene.render.resolution_y = 2160
     scene.render.resolution_percentage = 100
+    if args.variant.startswith('1080_'):
+        eevee.use_raytracing = args.variant == '1080_rt_enabled'
+        if args.variant == '1080_wrong_dimensions':
+            scene.render.resolution_x = 1920
+            scene.render.resolution_y = 1080
     scene.render.fps = 24
     scene.render.fps_base = 1
     if args.variant == "fractional_fps":
@@ -257,7 +262,7 @@ def main():
         foot_probes.pop("R")
     job = {
         "schema": "client-white-model-job.v1", "job_id": "synthetic-" + args.variant,
-        "standards_version": "1.0.0", "standards_sha256": sha(args.standards),
+        "standards_version": json.loads(Path(args.standards).read_text(encoding='utf-8'))['version'], "standards_sha256": sha(args.standards),
         "source": {"path": "source.fixture", "sha256": sha(root / "source.fixture"), "width": 3840, "height": 2160, "fps_num": 24, "fps_den": 1, "frame_count": scene.frame_end},
         "template": {"path": "template.blend", "sha256": sha(root / "template.blend"), "level": "L3"},
         "render": {"width": 3840, "height": 2160, "percentage": 100, "samples": 64, "dark_scene": True},
@@ -267,6 +272,9 @@ def main():
                   "production_objects": [*parts.values(), rig.name, support.name, camera.name, light.name],
                   "support_objects": [support.name], "excluded_source_objects": excluded_source, "approved_visibility_exceptions": []},
     }
+    if args.variant.startswith('1080_'):
+        job['profile'] = 'client-4k-project-1080p'
+        job['render'].update(output_width=1920, output_height=1080, raytracing=False)
     if args.variant == "wrong_source_hash":
         job["source"]["sha256"] = "0" * 64
     if args.variant == "wrong_standards_hash":
@@ -288,6 +296,8 @@ def main():
         renders.mkdir()
         path = renders / "frame_0001.png"
         scene.render.filepath = str(path)
+        if args.variant.startswith('1080_'):
+            scene.render.resolution_x=1920;scene.render.resolution_y=1080
         bpy.ops.render.render(write_still=True)
         manifest = {
             "schema": "client-white-model-render.v1", "status": "COMPLETE",
@@ -298,6 +308,9 @@ def main():
             "engine": scene.render.engine, "dark_scene": True, "raytracing": True,
             "completed": [{"frame": 1, "path": path.name, "sha256": sha(path), "width": 3840, "height": 2160}],
         }
+        if args.variant.startswith('1080_'):
+            manifest.update(width=1920,height=1080,saved_project_width=3840,saved_project_height=2160,raytracing=False)
+            manifest['completed'][0].update(width=1920,height=1080)
         (renders / "render_manifest.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
 
 

@@ -1,8 +1,8 @@
 {
   "schema": "client-assets.v1",
   "asset_release": "v1.1.0",
-  "standards_version": "1.0.0",
-  "standards_sha256": "f3ef227cdf20409a23e4e65a2b32f8b3cc836c1fcb243dbdac1658f398726c99",
+  "standards_version": "1.1.0",
+  "standards_sha256": "a09308b68416da20680bc809117d8bfecb2d5d704b059556d7b78826c1b7f000",
   "date": "2026-10-07 Asia/Shanghai",
   "publication_scope": "User requested public publication of the client model, standards and examples in this conversation.",
   "assets": [

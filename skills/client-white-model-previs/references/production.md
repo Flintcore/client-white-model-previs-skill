@@ -12,11 +12,11 @@
 
 ```powershell
 $S = Join-Path $HOME '.codex/skills/client-white-model-previs/scripts'
-python -X utf8 "$S/job.py" init --source SOURCE.mp4 --template TEMPLATE.blend --output WORK_JOB --name A --frames 240 --worker-id worker-a --palette-decision '本任务已确认的角色身份色' --dark-scene
+python -X utf8 "$S/job.py" init --source SOURCE.mp4 --template TEMPLATE.blend --output WORK_JOB --name A --profile client-4k-project-1080p --worker-id worker-a --palette-decision '本任务已确认的角色身份色' --dark-scene
 python -X utf8 "$S/media.py" stage --job WORK_JOB/job.json
 ```
 
-`--frames 240` 只适用于确认24fps的前10秒；整片不传该参数。初始化时实际读源FPS/帧数，不以240套所有视频。默认 `client-4k` 与非4K源片冲突会停止，先确认甲方希望源原生还是新4K规格，再采用相应项目约定；没有放大诊断图的选项。`source-native` 用于有明确源原生约定的其他任务。
+整片不传 `--frames`；`--frames 240` 只适用于明确确认24fps的前10秒。默认 `client-4k-project-1080p`：工程4K/100%，视频直接1080p/100%，64采样，光追false；原件分辨率/字节和FPS另行记录。`render.width/height` 为存盘工程规格，`render.output_width/output_height` 为实际导出规格。横片默认3840×2160工程、1920×1080视频；上下对比1920×2160，原件不缩小。源片比例不符先明确构图，不静默裁切。历史client-4k/source-native只用于明确选定的旧口径诊断回归，新客户制作使用当前profile。
 
 输入为完整片时，默认保留完整视频；前N帧样片做真实解码像素前缀比对。其他起点的分段先制作/验证准确赋给该job的原片段，记录完整源起止帧；不可用关键帧 seek 的近似段冒充逐帧一致。
 

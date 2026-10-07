@@ -512,13 +512,22 @@ def verify_render_manifest(manifest_path, lease, expected_sha256):
         raise ValueError("Claimed task must pin its exact render frame range")
     count = end - start + 1
     render_spec = spec.get("render", spec)
-    dims = (render_spec.get("width"), render_spec.get("height"))
+    dims = (render_spec.get('output_width', render_spec.get("width")),
+            render_spec.get('output_height', render_spec.get("height")))
     if any(isinstance(v, bool) or not isinstance(v, int) or v <= 0 for v in dims):
         raise ValueError("Claimed task must pin positive native render dimensions")
     if (manifest.get("frame_start"), manifest.get("frame_end")) != (start, end):
         raise ValueError("Render manifest frame range differs from the claimed task")
     if (manifest.get("width"), manifest.get("height")) != dims:
         raise ValueError("Render manifest dimensions differ from the claimed task")
+    if spec.get('profile') == 'client-4k-project-1080p':
+        project_dims=(render_spec.get('width'),render_spec.get('height'))
+        if (project_dims not in {(3840,2160),(2160,3840)} or
+                dims != (project_dims[0]//2,project_dims[1]//2) or
+                render_spec.get('samples')!=64 or render_spec.get('raytracing') is not False or
+                (manifest.get('saved_project_width'),manifest.get('saved_project_height')) != project_dims or
+                manifest.get('samples')!=64 or manifest.get('raytracing') is not False):
+            raise ValueError('Current task requires 4K project provenance, 1080p native delivery, 64 samples and ray tracing disabled')
     completed = manifest.get("completed")
     if not isinstance(completed, list) or len(completed) != count:
         raise ValueError("Render manifest completed count differs from the assigned frame count")

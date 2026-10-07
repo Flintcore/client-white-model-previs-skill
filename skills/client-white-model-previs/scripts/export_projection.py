@@ -220,8 +220,8 @@ def export(args):
     fps=scene.render.fps/scene.render.fps_base
     if not math.isclose(fps,s['fps_num']/s['fps_den'],rel_tol=2e-7,abs_tol=1e-8):
         raise ValueError('Saved scene FPS differs from locked source')
-    if (scene.render.resolution_x,scene.render.resolution_y)!=(s['width'],s['height']):
-        raise ValueError('Actual saved source aspect/dimensions differ')
+    if (scene.render.resolution_x,scene.render.resolution_y)!=(job['render']['width'],job['render']['height']):
+        raise ValueError('Actual saved project aspect/dimensions differ')
     if not math.isclose(scene.render.pixel_aspect_x/scene.render.pixel_aspect_y,1.,rel_tol=1e-7):
         raise ValueError('Square-pixel source mapping required')
     space=config['space']; w=space['width']; h=space['height']

@@ -35,6 +35,9 @@ def write(path, value):
 
 @unittest.skipUnless(REQUIRED, 'Real Blender/Git/FFmpeg/FFprobe are required')
 class RenderPipelineTests(unittest.TestCase):
+    PROFILE='client-4k'
+    VARIANT='positive'
+    SOURCE_AUDIO=False
     @classmethod
     def command(cls, args, expected=0):
         result = subprocess.run([str(a) for a in args], capture_output=True, text=True,
@@ -67,17 +70,18 @@ class RenderPipelineTests(unittest.TestCase):
         cls.command(['git', '-C', checkout, 'commit', '-qm', 'Isolated synthetic render contract'])
         fixture = cls.root/'fixture'
         cls.bpy(REPO/'tests'/'blender_fixture.py', ['--output', fixture,
-            '--standards', skill/'references'/'standards.json'])
+            '--standards', skill/'references'/'standards.json','--variant',cls.VARIANT])
         source = cls.root/'synthetic.mp4'
+        audio=['-f','lavfi','-i','sine=frequency=440:sample_rate=48000','-t','0.125','-c:a','aac'] if cls.SOURCE_AUDIO else ['-an']
         cls.command(['ffmpeg', '-hide_banner', '-v', 'error', '-f', 'lavfi', '-i',
-            'color=c=white:s=3840x2160:r=24', '-frames:v', '3', '-an', '-c:v',
+            'color=c=white:s=3840x2160:r=24', *audio,'-frames:v', '3', '-c:v',
             'libx264', '-preset', 'ultrafast', '-pix_fmt', 'yuv420p', source])
         cls.job_root = cls.root/'job'
         cls.job_path = cls.job_root/'job.json'
         cls.command([sys.executable, '-X', 'utf8', cls.scripts/'job.py', 'init',
             '--source', source, '--template', fixture/'template.blend', '--output', cls.job_root,
             '--name', 'fixture', '--worker-id', 'synthetic-worker', '--palette-decision',
-            'SYNTHETIC_CONTRACT_NOT_CLIENT', '--dark-scene'])
+            'SYNTHETIC_CONTRACT_NOT_CLIENT', '--dark-scene','--profile',cls.PROFILE])
         cls.job = read(cls.job_path)
         cls.job['scene'] = read(fixture/'job.json')['scene']
         cls.job['scene']['shots'] = [{'id': 'S01', 'start': 1, 'end': 3}]
@@ -303,10 +307,59 @@ class RenderPipelineTests(unittest.TestCase):
         manifest = read(out/'render_manifest.json')
         self.assertEqual(manifest['status'], 'COMPLETE')
         self.assertEqual(len(manifest['completed']), 3)
-        self.assertEqual((manifest['width'], manifest['height']), (3840, 2160))
+        self.assertEqual((manifest['width'], manifest['height']),
+                         (1920,1080) if self.PROFILE=='client-4k-project-1080p' else (3840,2160))
         self.assertEqual(manifest['engineering_report_sha256'], sha(self.engineering))
         self.assertEqual(manifest['match_report_sha256'], sha(self.report))
         self.assertEqual(sha(self.blend), self.blend_hash)
+
+
+class CurrentRenderPipelineTests(RenderPipelineTests):
+    """Repeat actual gated projection/preview/native tests for the revised profile."""
+    PROFILE='client-4k-project-1080p'
+    VARIANT='1080_positive'
+    SOURCE_AUDIO=True
+
+    def test_actual_encoding_keeps_4k_original_and_1080p_panels_and_audio(self):
+        out=self.job_root/'native-current-media'
+        result=self.native(out,self.report)
+        self.assertEqual(result.returncode,0,result.stdout+result.stderr)
+        self.command([sys.executable,'-X','utf8',self.scripts/'media.py','stage','--job',self.job_path])
+        folder=self.job_root/'delivery'/'fixture'
+        final_blend=folder/'fixture.blend'
+        shutil.copy2(self.blend,final_blend)
+        final_report=self.job_root/'current-media-blender.json'
+        self.bpy(self.scripts/'blender_check.py',['--job',self.job_path,'--report',final_report,'--renders',out],final_blend)
+        report=self.job_root/'current-media.json'
+        self.command([sys.executable,'-X','utf8',self.scripts/'media.py','encode','--job',self.job_path,
+            '--blend',final_blend,'--renders',out,'--blender-report',final_report,'--report',report])
+        data=read(report);items={a['kind']:a for a in data['artifacts']}
+        self.assertTrue(data['passed'])
+        self.assertGreater(data['source_audio_packet_count'],0)
+        for kind,dimensions in [('original',(3840,2160)),('white',(1920,1080)),('comparison',(1920,2160))]:
+            self.assertEqual((items[kind]['video']['width'],items[kind]['video']['height']),dimensions)
+            self.assertEqual(items[kind]['video']['frame_count'],3)
+            self.assertTrue(items[kind]['full_decode_pass'])
+            self.assertTrue(items[kind]['audio_identity_pass'])
+        self.assertEqual(sha(folder/'fixture.mp4'),self.job['source']['sha256'])
+        self.assertEqual(sha(final_blend),self.blend_hash)
+
+    def test_native_manifest_saved_4k_provenance_is_required(self):
+        out=self.job_root/'native-current-provenance'
+        result=self.native(out,self.report)
+        self.assertEqual(result.returncode,0,result.stdout+result.stderr)
+        self.assertEqual(sha(self.blend),self.blend_hash)
+        final=self.job_root/'native-current-final.json'
+        self.bpy(self.scripts/'blender_check.py',['--job',self.job_path,'--report',final,'--renders',out],self.blend)
+        self.assertTrue(read(final)['render_evidence']['passed'])
+        manifest_path=out/'render_manifest.json'
+        original=manifest_path.read_bytes()
+        data=read(manifest_path);data['saved_project_width']=1920;write(manifest_path,data)
+        try:
+            failed=self.bpy(self.scripts/'blender_check.py',['--job',self.job_path,'--report',final,'--renders',out],self.blend,expected=None)
+            self.assertNotEqual(failed.returncode,0)
+            self.assertFalse(read(final)['render_evidence']['passed'])
+        finally:manifest_path.write_bytes(original)
 
 
 if __name__ == '__main__':

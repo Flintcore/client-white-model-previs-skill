@@ -118,9 +118,14 @@ class TeamQueueTests(unittest.TestCase):
         return (b"\x89PNG\r\n\x1a\n" + chunk(b"IHDR", struct.pack(">IIBBBBB", width, height, 8, 2, 0, 0, 0)) +
                 chunk(b"IDAT", zlib.compress(rows)) + chunk(b"IEND", b""))
 
-    def render_fixture(self):
+    def render_fixture(self, current=False):
         task = self.task(source="a" * 64)
         task["spec"] = {"render": {"width": 4, "height": 2, "samples": 64, "percentage": 100}}
+        width,height=4,2
+        if current:
+            task['spec']['profile']='client-4k-project-1080p'
+            task['spec']['render'].update(width=3840,height=2160,output_width=1920,output_height=1080,raytracing=False)
+            width,height=1920,1080
         task["timeline"] = {"frame_start": 1, "frame_end": 2}
         task["job_id"] = Q.task_id(task)
         self.submit(task)
@@ -130,17 +135,33 @@ class TeamQueueTests(unittest.TestCase):
         completed = []
         for frame in (1, 2):
             image = render_dir / f"frame_{frame:04d}.png"
-            image.write_bytes(self.png())
+            image.write_bytes(self.png(width,height))
             completed.append({"frame": frame, "path": image.name, "sha256": hashlib.sha256(image.read_bytes()).hexdigest(),
-                              "width": 4, "height": 2})
+                              "width": width, "height": height})
         manifest = {"schema": "client-white-model-render.v1", "status": "COMPLETE", "job_id": lease["job_id"],
                     "standards_sha256": lease["standards_sha256"], "skill_revision": lease["skill_revision"],
-                    "width": 4, "height": 2, "resolution_percentage": 100, "upscaled": False,
+                    "width": width, "height": height, "resolution_percentage": 100, "upscaled": False,
                     "frame_start": 1, "frame_end": 2, "completed": completed}
         manifest_path = render_dir / "render_manifest.json"
         gate_path = self.root / "render_gate.json"
+        if current:
+            manifest.update(saved_project_width=3840,saved_project_height=2160,samples=64,raytracing=False)
         self.write_render_gate(manifest_path, manifest, gate_path, lease)
         return lease, manifest_path, manifest, gate_path
+
+    def test_current_render_manifest_separates_project_and_delivery_dimensions(self):
+        lease,path,manifest,gate=self.render_fixture(current=True)
+        actual=Q.verify_render_manifest(path,lease,hashlib.sha256(path.read_bytes()).hexdigest())
+        self.assertTrue(actual)
+
+    def test_current_render_manifest_rejects_changed_saved_project_or_raytracing(self):
+        lease,path,manifest,gate=self.render_fixture(current=True)
+        for key,value in [('saved_project_width',1920),('saved_project_height',1080),('raytracing',True),('samples',32)]:
+            with self.subTest(key=key):
+                changed=dict(manifest);changed[key]=value
+                path.write_text(json.dumps(changed),encoding='utf8')
+                with self.assertRaisesRegex(ValueError,'4K project provenance'):
+                    Q.verify_render_manifest(path,lease,hashlib.sha256(path.read_bytes()).hexdigest())
 
     def write_render_gate(self, manifest_path, manifest, gate_path, lease):
         manifest_path.write_text(json.dumps(manifest), encoding="utf-8")

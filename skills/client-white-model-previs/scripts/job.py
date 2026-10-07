@@ -40,6 +40,12 @@ def create_job(args):
     source_data.update(path='inputs/source.mp4',sha256=sha256(clip),audio_present=bool(info['audio']))
     template_data={'path':'inputs/template.blend','sha256':sha256(model),'level':'L3'}
     render={'width':info['width'],'height':info['height'],'percentage':100,'samples':64,'dark_scene':args.dark_scene}
+    if args.profile=='client-4k-project-1080p':
+        render.update(width=2160 if info['height']>info['width'] else 3840,
+                      height=3840 if info['height']>info['width'] else 2160,raytracing=False,
+                      output_width=1080 if info['height']>info['width'] else 1920,
+                      output_height=1920 if info['height']>info['width'] else 1080)
+    validate_render_contract(render,source_data,args.profile)
     timeline={'frame_start':1,'frame_end':count}
     spec={'render':render,'fps':f"{info['fps_num']}/{info['fps_den']}",'profile':args.profile,
           'palette_decision':args.palette_decision,'uniform_character_level':'L3'}
@@ -86,7 +92,7 @@ def main():
     p=argparse.ArgumentParser();sub=p.add_subparsers(dest='command',required=True)
     a=sub.add_parser('init');a.add_argument('--source',required=True);a.add_argument('--template',required=True)
     a.add_argument('--output',required=True);a.add_argument('--name',required=True);a.add_argument('--frames',type=int)
-    a.add_argument('--profile',choices=['client-4k','source-native'],default='client-4k')
+    a.add_argument('--profile',choices=['client-4k-project-1080p','client-4k','source-native'],default='client-4k-project-1080p')
     a.add_argument('--dark-scene',action='store_true');a.add_argument('--palette-decision',required=True)
     a.add_argument('--worker-id',required=True);a.add_argument('--skill-revision')
     a.add_argument('--ffmpeg',default='ffmpeg');a.add_argument('--ffprobe',default='ffprobe')

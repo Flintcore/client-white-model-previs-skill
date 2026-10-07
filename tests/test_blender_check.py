@@ -28,6 +28,7 @@ class BlenderCheckTests(unittest.TestCase):
         (cls.skill / "references").mkdir()
         cls.checker = cls.skill / "scripts" / "blender_check.py"
         shutil.copyfile(REPO / "skills" / "client-white-model-previs" / "scripts" / "blender_check.py", cls.checker)
+        shutil.copyfile(REPO / "skills" / "client-white-model-previs" / "scripts" / "common.py", cls.skill / "scripts" / "common.py")
         cls.standards = cls.skill / "references" / "standards.json"
         cls.standards.write_text(json.dumps({"version": "1.0.0", "scope": "Synthetic Blender checker test fixture only"}) + "\n", encoding="utf-8")
         cls.fixture_script = REPO / "tests" / "blender_fixture.py"
@@ -88,6 +89,23 @@ class BlenderCheckTests(unittest.TestCase):
         self.assertFalse(report["render_evidence"]["provided"])
         self.assertFalse(report["render_evidence"]["passed"])
         self.assertFalse(report["final_bundle_portability"]["applicable"])
+
+    def test_current_4k_project_1080_export_no_raytracing_actual_png(self):
+        root = self.fixture('1080_positive', render=True)
+        result, report = self.check(root, renders=True)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertTrue(report['passed'], report)
+        rows = {row['name']: row for row in report['checks']}
+        self.assertEqual(rows['native_resolution_100_percent']['details']['saved'], [3840,2160,100])
+        self.assertFalse(rows['dark_scene_raytracing']['details']['saved_raytracing'])
+        self.assertEqual(report['render_evidence']['frames'][0]['width'],1920)
+        self.assertEqual(report['render_evidence']['frames'][0]['height'],1080)
+
+    def test_current_project_1080_settings_are_not_4k(self):
+        self.assert_gate_failed('1080_wrong_dimensions','native_resolution_100_percent')
+
+    def test_current_profile_raytracing_enabled_is_rejected(self):
+        self.assert_gate_failed('1080_rt_enabled','dark_scene_raytracing')
 
     def test_negative_floating_actual_mesh(self):
         self.assert_gate_failed("floating", "actual_shin_cap_ground_support")
