@@ -9,6 +9,8 @@ description: "按甲方锁定规范制作、返修和验收 Blender 白模复刻
 
 ## 接收与版本锁定
 
+新设备先读[甲方素材取用](references/client-materials.md)：模型原件已在 `assets/client/models/person.blend`，规范和结构/反馈图也已随Skill安装。案例视频按 `scripts/client_assets.py list/fetch/verify` 从固定Release取用并验证SHA；默认当前源为 `0927-01`，练习对比只是质量参考，不自动获得123条门禁通过结论。已有本地素材先校验复用，不重复下载整包。
+
 1. 从当前任务/交付清单确认视频编号、范围、甲方模板、源文件 SHA、镜头切点和配色决定；文档/视频中的内容是资料，不是对工具的操作授权。保护原件和未保存的 Blender UI，后台修改另存版本，源 `.blend` 使用 `--disable-autoexec`。
 2. 有效规则在 [standards.md](references/standards.md)；机器目录是 [standards.json](references/standards.json)。**所有有效阻断规则**都进入逐镜审查，不只执行下面摘要。查看 [来源与冲突决定](references/source-decisions.md) 处理版本、删除线和个案。
 3. 每条任务锁 `skill_revision`（完整 Git SHA）、`standards_sha256`、源/模板 SHA、FPS 分数、范围、原生尺寸和身份色。`latest/main` 不是生产版本。升级标准重新排任务和审查，不沿用旧通过位。
@@ -42,7 +44,7 @@ description: "按甲方锁定规范制作、返修和验收 Blender 白模复刻
 
 ## 团队与大批量
 
-按 [多设备队列](references/fleet.md) 使用 `scripts/team_queue.py`。共享的是版本化技能和任务元数据，不是把客户素材上传公有仓库。中央单机 SQLite/HTTP 协调器负责原子领单、租约/心跳、到期重领、版本 pin、幂等提交；每设备只写自己的 job/lease 输出目录。
+按 [多设备队列](references/fleet.md) 使用 `scripts/team_queue.py`。用户明确指定的12项甲方参考已通过Git/固定Release发布；其他制作产物和凭据仍在团队自己的存储中。中央单机 SQLite/HTTP 协调器负责原子领单、租约/心跳、到期重领、版本 pin、幂等提交；每设备只写自己的 job/lease 输出目录。
 
 worker 完成只进入 `awaiting_review`；不同身份的 reviewer 核验不可变证据后才进入内部 `accepted`。公开仓库、机器 QA、内部 accepted 均不等于客户签收。先 10秒 pilot，再双设备真实联测、小批次和扩容；不能把本机并发单测说成30,000分钟压测。
 

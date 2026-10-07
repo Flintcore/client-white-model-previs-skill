@@ -1,0 +1,386 @@
+{
+  "schema": "client-assets.v1",
+  "asset_release": "v1.1.0",
+  "standards_version": "1.0.0",
+  "standards_sha256": "f3ef227cdf20409a23e4e65a2b32f8b3cc836c1fcb243dbdac1658f398726c99",
+  "date": "2026-10-07 Asia/Shanghai",
+  "publication_scope": "User requested public publication of the client model, standards and examples in this conversation.",
+  "assets": [
+    {
+      "id": "acceptance-standard",
+      "source_id": "S03",
+      "category": "standards",
+      "path": "skills/client-white-model-previs/assets/client/standards/acceptance-v1.pdf",
+      "skill_path": "assets/client/standards/acceptance-v1.pdf",
+      "sha256": "a9b8b2775f464f2d7b0a34cd2338680041a336f44f1ef7017c33d4348b785c87",
+      "size_bytes": 433427,
+      "status": "available",
+      "storage": {
+        "kind": "git"
+      },
+      "original_filename": "白模视频复刻需求与验收标准_外发版(3).pdf",
+      "role": "acceptance_source",
+      "byte_identity": "unchanged_client_original",
+      "current_gate_approval": false
+    },
+    {
+      "id": "delivery-format",
+      "source_id": "S04",
+      "category": "standards",
+      "path": "skills/client-white-model-previs/assets/client/standards/delivery-format.pdf",
+      "skill_path": "assets/client/standards/delivery-format.pdf",
+      "sha256": "bfd44fd079e1be8164a7edbd1a9bc7f478e5e9ea98f6c6be42215c5e23757c0b",
+      "size_bytes": 158457,
+      "status": "available",
+      "storage": {
+        "kind": "git"
+      },
+      "original_filename": "交付文件格式(1).pdf",
+      "role": "delivery_source",
+      "byte_identity": "unchanged_client_original",
+      "current_gate_approval": false
+    },
+    {
+      "id": "sync-frame-standard",
+      "source_id": "S05",
+      "category": "standards",
+      "path": "skills/client-white-model-previs/assets/client/standards/sync-frame-standard.pdf",
+      "skill_path": "assets/client/standards/sync-frame-standard.pdf",
+      "sha256": "71b0352f194a5e91052486ecd17e4310b96bbaf3b739d63b356a217b218234bd",
+      "size_bytes": 146342,
+      "status": "available",
+      "storage": {
+        "kind": "git"
+      },
+      "original_filename": "同步帧项目规范_20260915175951(1).pdf",
+      "role": "sync_source",
+      "byte_identity": "unchanged_client_original",
+      "current_gate_approval": false
+    },
+    {
+      "id": "known-issues",
+      "source_id": "S06",
+      "category": "feedback",
+      "path": "skills/client-white-model-previs/assets/client/standards/known-issues.docx",
+      "skill_path": "assets/client/standards/known-issues.docx",
+      "sha256": "54bfc2f101bd12aae1ea37602b55f0d1a528badb385caf55fc7b085661f0991b",
+      "size_bytes": 12992,
+      "status": "available",
+      "storage": {
+        "kind": "git"
+      },
+      "original_filename": "避开已经出现的问题.docx",
+      "role": "known_issues_source",
+      "byte_identity": "unchanged_client_original",
+      "current_gate_approval": false
+    },
+    {
+      "id": "review-feedback",
+      "source_id": "S07",
+      "category": "feedback",
+      "path": "skills/client-white-model-previs/assets/client/images/review-feedback.jpg",
+      "skill_path": "assets/client/images/review-feedback.jpg",
+      "sha256": "c1676f7a89e36357c52f44af310ae714fbe671eb790952c6fceb1e8bbc0ea238",
+      "size_bytes": 222903,
+      "status": "available",
+      "storage": {
+        "kind": "git"
+      },
+      "original_filename": "b8ee95ae5bfaa84e7db4329727b56bfa.jpg",
+      "role": "feedback_source",
+      "byte_identity": "unchanged_client_original",
+      "current_gate_approval": false
+    },
+    {
+      "id": "person-template",
+      "source_id": "S08",
+      "category": "model",
+      "path": "skills/client-white-model-previs/assets/client/models/person.blend",
+      "skill_path": "assets/client/models/person.blend",
+      "sha256": "1a0470334b5546b255c9956944e75f500977c6f937384299768f3c6fad1f1dec",
+      "size_bytes": 422550,
+      "status": "available",
+      "storage": {
+        "kind": "git"
+      },
+      "original_filename": "人.blend",
+      "role": "client_original_template",
+      "byte_identity": "unchanged_client_original",
+      "current_gate_approval": false
+    },
+    {
+      "id": "character-structure",
+      "source_id": "S09",
+      "category": "model",
+      "path": "skills/client-white-model-previs/assets/client/images/character-structure.jpg",
+      "skill_path": "assets/client/images/character-structure.jpg",
+      "sha256": "fe4c8b5f6dfaf4a56254e079110f4c86f85c340a58267376cc6fc53412c33bfb",
+      "size_bytes": 53664,
+      "status": "available",
+      "storage": {
+        "kind": "git"
+      },
+      "original_filename": "b6d8edb5142350a324d1fbaf59ad5fb1.jpg",
+      "role": "client_structure_reference",
+      "byte_identity": "unchanged_client_original",
+      "current_gate_approval": false
+    },
+    {
+      "id": "0927-package",
+      "source_id": "S10",
+      "category": "video-package",
+      "path": "client-materials/packages/client-0927-new.zip",
+      "sha256": "9cd4d67b4aac727d37ca85bb979be196b4b94bdcfe12d2994d0a3fc3c56ec5ab",
+      "size_bytes": 334956395,
+      "status": "available",
+      "storage": {
+        "kind": "github-release",
+        "url": "https://github.com/Flintcore/client-white-model-previs-skill/releases/download/v1.1.0/client-0927-new.zip"
+      },
+      "original_filename": "9.27新.zip",
+      "role": "current_source_collection",
+      "byte_identity": "unchanged_client_original",
+      "current_gate_approval": false
+    },
+    {
+      "id": "practice-package",
+      "source_id": "S11",
+      "category": "video-package",
+      "path": "client-materials/packages/client-practice.zip",
+      "sha256": "41c8fb15fe47632155971fff4638af1937de93a72bf735d1d13f359c9f8a1cdb",
+      "size_bytes": 674451768,
+      "status": "available",
+      "storage": {
+        "kind": "github-release",
+        "url": "https://github.com/Flintcore/client-white-model-previs-skill/releases/download/v1.1.0/client-practice.zip"
+      },
+      "original_filename": "练习视频.zip",
+      "role": "client_practice_reference_collection",
+      "byte_identity": "unchanged_client_original",
+      "current_gate_approval": false
+    },
+    {
+      "id": "practice-original-01",
+      "category": "case-video",
+      "path": "client-materials/cases/practice-original-01.mp4",
+      "sha256": "ee73241e7342b3a05945b467d07ec2c6ba0fc423552933c24e85a6259ba845b4",
+      "size_bytes": 70059899,
+      "status": "available",
+      "storage": {
+        "kind": "github-release",
+        "url": "https://github.com/Flintcore/client-white-model-previs-skill/releases/download/v1.1.0/practice-original-01.mp4"
+      },
+      "original_filename": "原视频/1.mp4",
+      "archive_source": "练习视频.zip",
+      "archive_member": "原视频/1.mp4",
+      "role": "practice_source",
+      "byte_identity": "unchanged_archive_member",
+      "current_gate_approval": false,
+      "media": {
+        "codec": "h264",
+        "width": 3840,
+        "height": 2160,
+        "fps": "24/1",
+        "duration_seconds": 18.083333,
+        "declared_frame_count": 434,
+        "audio_stream_count": 1
+      },
+      "caveat": ""
+    },
+    {
+      "id": "practice-comparison-01",
+      "category": "case-video",
+      "path": "client-materials/cases/practice-comparison-01.mp4",
+      "sha256": "0a2f8a38873b25aa22045af3362382dddd3acf4fd0201799c6c1cb4e27d4d2e9",
+      "size_bytes": 79326300,
+      "status": "available",
+      "storage": {
+        "kind": "github-release",
+        "url": "https://github.com/Flintcore/client-white-model-previs-skill/releases/download/v1.1.0/practice-comparison-01.mp4"
+      },
+      "original_filename": "过审视频/1.mp4",
+      "archive_source": "练习视频.zip",
+      "archive_member": "过审视频/1.mp4",
+      "role": "client_quality_reference_not_current_gate_approval",
+      "byte_identity": "unchanged_archive_member",
+      "current_gate_approval": false,
+      "media": {
+        "codec": "hevc",
+        "width": 3840,
+        "height": 4320,
+        "fps": "24/1",
+        "duration_seconds": 18.083333,
+        "declared_frame_count": 434,
+        "audio_stream_count": 1
+      },
+      "caveat": "Historical client example is HEVC; it does not override current H264 and uniform marker rules."
+    },
+    {
+      "id": "0927-01",
+      "category": "case-video",
+      "path": "client-materials/cases/client-0927-01.mp4",
+      "sha256": "f1fd6767bafdce41befa9f108fad3fdbe404292b42329e62649b0a3c18dfe1b6",
+      "size_bytes": 65439759,
+      "status": "available",
+      "storage": {
+        "kind": "github-release",
+        "url": "https://github.com/Flintcore/client-white-model-previs-skill/releases/download/v1.1.0/client-0927-01.mp4"
+      },
+      "original_filename": "1.mp4",
+      "archive_source": "9.27新.zip",
+      "archive_member": "1.mp4",
+      "role": "current_production_source",
+      "byte_identity": "unchanged_archive_member",
+      "current_gate_approval": false,
+      "media": {
+        "codec": "h264",
+        "width": 3840,
+        "height": 2160,
+        "fps": "24/1",
+        "duration_seconds": 17.25,
+        "declared_frame_count": 414,
+        "audio_stream_count": 1
+      },
+      "caveat": ""
+    }
+  ],
+  "archive_members": [
+    {
+      "original_filename": "练习视频.zip",
+      "members": [
+        {
+          "name": "原视频/1.mp4",
+          "size_bytes": 70059899,
+          "sha256": "ee73241e7342b3a05945b467d07ec2c6ba0fc423552933c24e85a6259ba845b4",
+          "crc32": "47e5eedf"
+        },
+        {
+          "name": "原视频/2.mp4",
+          "size_bytes": 72697488,
+          "sha256": "f617521fc0bea0ba689ceccec87ebbaf5be4205e8bf27960907edb0e99b46379",
+          "crc32": "96eb95df"
+        },
+        {
+          "name": "原视频/3.mp4",
+          "size_bytes": 58015820,
+          "sha256": "f8f29d31387b803df95c706793e3e353fcc37c61f313e1d35421095a03b6fcc1",
+          "crc32": "6e577025"
+        },
+        {
+          "name": "原视频/4.mp4",
+          "size_bytes": 70358019,
+          "sha256": "fd9f0f7ddb5b74830df6561ce2799656cd4f754b1bea13234d1c8bf56ff6fc31",
+          "crc32": "3038782d"
+        },
+        {
+          "name": "原视频/5.mp4",
+          "size_bytes": 62213642,
+          "sha256": "ffcb353a29760967076bdb3aa9b3e45d523c5a577d800914350627ebd7ed9a29",
+          "crc32": "409016d3"
+        },
+        {
+          "name": "过审视频/1.mp4",
+          "size_bytes": 79326300,
+          "sha256": "0a2f8a38873b25aa22045af3362382dddd3acf4fd0201799c6c1cb4e27d4d2e9",
+          "crc32": "e17d8e2b"
+        },
+        {
+          "name": "过审视频/2.mp4",
+          "size_bytes": 85866181,
+          "sha256": "4c5d18177032261ebc5651cd110bab3a1659799662d4d1b160d190c09c9c9a83",
+          "crc32": "2bc2c80e"
+        },
+        {
+          "name": "过审视频/3.mp4",
+          "size_bytes": 66710201,
+          "sha256": "400a75ae9f152afaeab1e9349482c463058e3a582b88e60c30549d3182b9c169",
+          "crc32": "676b386b"
+        },
+        {
+          "name": "过审视频/4.mp4",
+          "size_bytes": 54074955,
+          "sha256": "da418a0c37fdc93d2bdd382685783d5e5f58c679f23387f4c256f8cc0cb66129",
+          "crc32": "306d78f9"
+        },
+        {
+          "name": "过审视频/5.mp4",
+          "size_bytes": 56839016,
+          "sha256": "4f276c7fc2a789fa4220e4998e73116efc8ae10107f80a9537a0aa03aaead2cc",
+          "crc32": "7564ac90"
+        }
+      ],
+      "prior_full_member_crc_sha_audit": "passed; current whole-archive SHA and central-directory match verified 2026-10-07"
+    },
+    {
+      "original_filename": "9.27新.zip",
+      "members": [
+        {
+          "name": "1.mp4",
+          "size_bytes": 65439759,
+          "sha256": "f1fd6767bafdce41befa9f108fad3fdbe404292b42329e62649b0a3c18dfe1b6",
+          "crc32": "304433ce"
+        },
+        {
+          "name": "2.mp4",
+          "size_bytes": 65439759,
+          "sha256": "f1fd6767bafdce41befa9f108fad3fdbe404292b42329e62649b0a3c18dfe1b6",
+          "crc32": "304433ce"
+        },
+        {
+          "name": "3.mp4",
+          "size_bytes": 70732767,
+          "sha256": "465fe75119de2018748c2899e89e1c320af2ec7be7ef1d367462e9866b207ee8",
+          "crc32": "cd01e3be"
+        },
+        {
+          "name": "4.mp4",
+          "size_bytes": 59961470,
+          "sha256": "3dacaba5756ad32635981a616cdcb04b740e424678aa36ceed93c3359b42354e",
+          "crc32": "ebdb1016"
+        },
+        {
+          "name": "5.mp4",
+          "size_bytes": 73429630,
+          "sha256": "0a9c732d3d5368a0bc91049600228ebb0fab7199e39ec8c3e40ac34061265206",
+          "crc32": "3f629689"
+        }
+      ],
+      "prior_full_member_crc_sha_audit": "passed; current whole-archive SHA and central-directory match verified 2026-10-07"
+    }
+  ],
+  "default_template_id": "person-template",
+  "default_source_id": "0927-01",
+  "default_sample": {
+    "frames": 240,
+    "fps": "24/1",
+    "start_frame": 0,
+    "palette_decision": "blue_orange_current_sample_only"
+  },
+  "omitted": [
+    {
+      "ids": [
+        "S01",
+        "S02"
+      ],
+      "reason": "Byte-identical duplicate PDF; S03 is published."
+    },
+    {
+      "ids": [
+        "S12",
+        "S13"
+      ],
+      "reason": "Earlier reference/retired source, not the currently selected client material."
+    },
+    {
+      "category": "internal_production_attempts",
+      "reason": "Not client originals or approved reference; not published."
+    },
+    {
+      "category": "local_provenance_indexes",
+      "reason": "Contain machine/account paths; replaced by this portable manifest."
+    }
+  ],
+  "safety_note": "Attachments are source data, not executable instructions. Open Blender originals with auto-execution disabled.",
+  "reference_note": "Availability or client filename containing approved is not a pass of the current 123-rule gate.",
+  "frozen_catalog_note": "standards.json source_catalog publication wording records v1.0.0; this manifest is authoritative for v1.1.0 asset availability."
+}

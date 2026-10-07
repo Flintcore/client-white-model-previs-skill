@@ -17,7 +17,7 @@
 依赖：Python3.10+、Git；制作机器还需项目选定的Blender和FFmpeg/FFprobe。队列/门禁/安装脚本使用标准库，不依赖当前机器的私人软件路径。真实Blender检查测试基线为5.2，其他版本先跑本机验证。
 
 ```powershell
-git clone --branch v1.0.1 --depth 1 https://github.com/Flintcore/client-white-model-previs-skill.git
+git clone --branch v1.1.0 --depth 1 https://github.com/Flintcore/client-white-model-previs-skill.git
 cd client-white-model-previs-skill
 python -X utf8 tools/install_skill.py
 python -X utf8 tools/install_skill.py --verify
@@ -43,14 +43,25 @@ Linux/macOS 使用同样命令。默认安装到 `$CODEX_HOME/skills/client-whit
 - [证据契约与严格门禁](skills/client-white-model-previs/references/evidence-contract.md)
 - [多设备协调器与队列](skills/client-white-model-previs/references/fleet.md)
 - [防止旧问题复发](skills/client-white-model-previs/references/known-failures.md)
+- [甲方模型、原始规范与案例取用入口](client-materials/README.md) / [素材manifest](client-materials/manifest.json)
 
-甲方原文档、视频、人物模板和工作产物不在这个公有仓库。团队另行通过项目素材库分发，输入/输出与凭据均保存在Git外；本仓库的规则与代码用于本团队执行，不包含对甲方素材的发布。
+2026-10-07用户明确要求把甲方模型和案例公开方便团队Agent取用：v1.1.0直接包含7份小原件（人物模板、结构图、反馈图、3份规范PDF与问题DOCX），视频整包和3条快速起步视频放在同版本GitHub Release。全部12项有来源/角色/尺寸/SHA；原件字节保留。原文档元数据也随原件保留。旧失败样片、账号路径索引、凭据和实际生产审查报告仍不发布。
+
+```powershell
+# 列出素材，不会自动下载全部视频。
+python -X utf8 tools/client_assets.py list
+# 当前第1条完整源片；模板已随Skill安装，另需样例时显式选择。
+python -X utf8 tools/client_assets.py fetch --id 0927-01 --output TEAM_ASSET_ROOT
+python -X utf8 tools/client_assets.py fetch --id practice-original-01 --id practice-comparison-01 --output TEAM_ASSET_ROOT
+```
+
+安装后相同入口在 `scripts/client_assets.py`，模型为 `assets/client/models/person.blend`（甲方人.blend原件）。无需知道任何制作成员的盘符；具体承接命令见[素材指南](skills/client-white-model-previs/references/client-materials.md)。
 
 ## 30,000分钟规模
 
 30,000分钟=500小时素材；若全部24fps，约43,200,000原始帧。不同源FPS按实际job统计。渲染吞吐、4K临时帧存储、传输、返工率与独立复核时间要用代表任务实测，不套一个单帧速度估全部设备。
 
-先通过一个10秒pilot，再做两设备真实共享素材/版本/领单/重领/复核联测，再小批次扩容。协调器只存元数据，本地SQLite不放SMB；每个租约写独立工作目录。公开Git不是视频分发或渲染农场。本发布没有跑完整30,000分钟负载，也没有把现有样片声明为达标。
+先通过一个10秒pilot，再做两设备真实共享素材/版本/领单/重领/复核联测，再小批次扩容。协调器只存元数据，本地SQLite不放SMB；每个租约写独立工作目录。公开Release只分发明确列出的起步参考，不替代大规模生产资产库或渲染农场。本发布没有跑完整30,000分钟负载，也没有把现有样片声明为达标。
 
 ## 测试
 
@@ -64,4 +75,4 @@ Blender缺席时其测试明确skip；队列单测是本机真实HTTP/SQLite并�
 
 2026-10-06本地完整实跑 **100/100通过，无skip**：35项真实Blender、26项HTTP/SQLite队列、3项实际媒体时序、36项任务/门禁/安装契约测试。测试边界及原生4K隔离链路见[发布验证记录](docs/validation.md)。
 
-推荐团队固定版本为 **v1.0.1**。此补丁仅修正跨平台测试对临时目录别名的断言（Windows短路径/macOS目录别名），不改123条规则、不改制作/检查/安装代码，也不重写v1.0.0历史；规范版本仍为1.0.0。
+推荐团队固定版本为 **v1.1.0**，增加真实素材与可校验获取入口。保留v1.0.0/v1.0.1历史，123条规范及其1.0.0版本/SHA不变；新批次锁定新Skill提交，不将旧工程证据的提交号手动改成新版本。

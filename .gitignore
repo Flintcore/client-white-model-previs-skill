@@ -26,3 +26,7 @@ jobs/
 .env*
 installation.json
 skill-backups/
+# Explicit client originals published by the user's 2026-10-07 request.
+!skills/client-white-model-previs/assets/client/models/person.blend
+!skills/client-white-model-previs/assets/client/images/character-structure.jpg
+!skills/client-white-model-previs/assets/client/images/review-feedback.jpg
