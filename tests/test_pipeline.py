@@ -288,7 +288,7 @@ class PipelineTests(ContractFixture):
             result = pipeline.record_stage(self.job_path, token, "passed", report_path=report)
         self.assertEqual(result["status"], "passed")
         self.assertGreaterEqual(validator.call_count, 1)
-        validator.assert_any_call(self.job_path, report)
+        validator.assert_any_call(self.job_path, report.resolve())
 
     def test_preview_recomputation_failure_overrides_passed_boolean(self):
         self._complete_to("light")
@@ -444,7 +444,7 @@ class PipelineTests(ContractFixture):
                 pipeline._validate_evidence("render", self.job_path, self.root,
                     pipeline._fingerprint(self.root, ["artifacts/render.json", "artifacts/candidate.blend"]),
                     "artifacts/render.json")
-        validator.assert_called_once_with(self.job_data, scene, self.artifacts)
+        validator.assert_called_once_with(self.job_data, scene.resolve(), self.artifacts.resolve())
 
     def test_render_receipt_expands_and_hashes_frame_files(self):
         report = self.artifacts / "render.json"
@@ -479,8 +479,8 @@ class PipelineTests(ContractFixture):
         with mock.patch.object(gate, "verify_bundle", validator):
             with self.assertRaisesRegex(ValueError, "no longer matches"):
                 pipeline._validate_evidence("review", self.job_path, self.root, [], "artifacts/gate.json")
-        validator.assert_called_once_with(self.job_path, self.artifacts / "blender.json",
-                                         self.artifacts / "media.json", self.artifacts / "visual.json")
+        validator.assert_called_once_with(self.job_path, (self.artifacts / "blender.json").resolve(),
+                                         (self.artifacts / "media.json").resolve(), (self.artifacts / "visual.json").resolve())
 
     def test_final_gate_reverification_does_not_set_client_acceptance(self):
         rows = []

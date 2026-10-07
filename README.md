@@ -18,7 +18,7 @@
 依赖：Python3.10+、Git；制作机器还需项目选定的Blender和FFmpeg/FFprobe。队列/门禁/安装脚本使用标准库，不依赖当前机器的私人软件路径。真实Blender检查测试基线为5.2，其他版本先跑本机验证。
 
 ```powershell
-git clone --branch v1.2.0 --depth 1 https://github.com/Flintcore/client-white-model-previs-skill.git
+git clone --branch v1.2.1 --depth 1 https://github.com/Flintcore/client-white-model-previs-skill.git
 cd client-white-model-previs-skill
 python -X utf8 tools/install_skill.py
 python -X utf8 tools/install_skill.py --verify
@@ -81,6 +81,6 @@ Blender缺席时其测试明确skip；队列单测是本机真实HTTP/SQLite并�
 
 2026-10-07 v1.2.0本地最终回归 **300项：299通过、1个Windows符号链接环境跳过、0失败**；38项Blender检查及26项真实预览/投影/原生渲染链路全部执行。含4K工程不改存盘、1080p实际渲染、源音频包/PTS保留、队列导出规格复验的正负例，见[规格修订验证](docs/render-profile-validation.md)。Mac本机GPU与客户视觉验收另行实测。
 
-推荐团队固定版本为 **v1.2.0**。新增固定SOP、匹配预检和2026-10-07甲方规格变更：**4K可编辑工程、1080p视频、64采样、关闭光追**。标准版本1.1.0保留133条来源映射与123条检查，仅CW071/CW074按直接用户说明修订，原文和旧1.0.0在Git历史保留；新批次锁定新提交，不修改旧job的pin/通过位。
+推荐团队固定版本为 **v1.2.1**。新增固定SOP、匹配预检和2026-10-07甲方规格变更：**4K可编辑工程、1080p视频、64采样、关闭光追**。标准版本1.1.0保留133条来源映射与123条检查，仅CW071/CW074按直接用户说明修订，原文和旧1.0.0在Git历史保留；新批次锁定新提交，不修改旧job的pin/通过位。
 
 v1.2.0包含工作分支 `codex/previs-pipeline-optimization` 的固定SOP/提效模块及修订渲染profile。新原生渲染CLI增加必填 `--match-report`，先物理检查与全帧匹配预检，旧job/报告继续使用其原固定提交。验证范围见[提效模块验证](docs/optimization-validation.md)，不是任意客户视频自动复刻算法。

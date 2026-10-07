@@ -1,6 +1,6 @@
 # Mac 安装与本机验证
 
-固定团队版本v1.2.0，生产任务还会锁定完整Git SHA。当前客户口径：4K存盘工程、1080p视频、64采样、关闭光追。安装、输入校验和开始SOP不等于自动完成视频或客户验收。
+固定团队版本v1.2.1，生产任务还会锁定完整Git SHA。当前客户口径：4K存盘工程、1080p视频、64采样、关闭光追。安装、输入校验和开始SOP不等于自动完成视频或客户验收。
 
 ## 1. 已有环境检查
 
@@ -21,12 +21,12 @@ Blender装在其他目录时只修改`BLENDER_EXE`。本发布Blender真实测�
 ## 2. 克隆固定版本、安装或有备份更新
 
 ```bash
-ROOT="$HOME/Projects/client-white-model-previs-v1.2.0"
+ROOT="$HOME/Projects/client-white-model-previs-v1.2.1"
 test ! -e "$ROOT"
 mkdir -p "$(dirname "$ROOT")"
-git clone --branch v1.2.0 --depth 1 https://github.com/Flintcore/client-white-model-previs-skill.git "$ROOT"
+git clone --branch v1.2.1 --depth 1 https://github.com/Flintcore/client-white-model-previs-skill.git "$ROOT"
 cd "$ROOT"
-PIN="$(git rev-parse 'v1.2.0^{commit}')"
+PIN="$(git rev-parse 'v1.2.1^{commit}')"
 test "$(git rev-parse HEAD)" = "$PIN"
 SKILL="${CODEX_HOME:-$HOME/.codex}/skills/client-white-model-previs"
 if [ -e "$SKILL" ]; then
@@ -49,7 +49,7 @@ python3 -X utf8 -m unittest discover -s tests -p test_render_pipeline.py -v
 
 ```bash
 SOURCE="$HOME/Movies/white-model-inputs/3.mp4"
-JOB="$HOME/Movies/white-model-work/3-full-v1.2.0"
+JOB="$HOME/Movies/white-model-work/3-full-v1.2.1"
 test -f "$SOURCE"
 test ! -e "$JOB"
 S="$SKILL/scripts"
