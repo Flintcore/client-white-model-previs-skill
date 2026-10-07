@@ -8,6 +8,7 @@
 - 统一L3、球头/分段几何角色、完整肢体、朝向标识、身份色稳定；真实落地/支撑/步态、空间/遮挡、相机/节奏、基础光照。
 - 实际Blender全帧检查、原生PNG与render manifest、64采样/暗场光追、H.264/FPS/尺寸、原片声音、片尾和四文件ZIP。
 - 中央任务队列：版本锁定、确定性job_id、原子领单、租约/心跳、到期重领、幂等提交、独立reviewer与返工。
+- 固定阶段缓存和实测计时；实际工程投影、全帧低清预览、源片数值匹配预检与4K入口双检查。灯光变更只失效下游，缺观测/旧证据/损坏缓存保持返修。
 - 标准、技术证据、独立视觉审查与客户签收分层；旧删除线和当前样片个案不被错误泛化。
 
 **100%指有效要求覆盖和严格放行条件，不表示任意视频会自动100%复刻或甲方已验收。**相机、轮廓、步态、遮挡、节奏和光影必须以实际源片与成片独立复核。失败样片的解算轨迹没有作为批量生产算法发布。
@@ -40,6 +41,7 @@ Linux/macOS 使用同样命令。默认安装到 `$CODEX_HOME/skills/client-whit
 - [完整标准](skills/client-white-model-previs/references/standards.md) / [机器规则目录](skills/client-white-model-previs/references/standards.json)
 - [来源、删除线与冲突](skills/client-white-model-previs/references/source-decisions.md)
 - [制作、返修与原生渲染命令](skills/client-white-model-previs/references/production.md)
+- [固定 SOP、缓存和匹配预检](skills/client-white-model-previs/references/optimization.md)
 - [证据契约与严格门禁](skills/client-white-model-previs/references/evidence-contract.md)
 - [多设备协调器与队列](skills/client-white-model-previs/references/fleet.md)
 - [防止旧问题复发](skills/client-white-model-previs/references/known-failures.md)
@@ -76,3 +78,5 @@ Blender缺席时其测试明确skip；队列单测是本机真实HTTP/SQLite并�
 2026-10-06本地完整实跑 **100/100通过，无skip**：35项真实Blender、26项HTTP/SQLite队列、3项实际媒体时序、36项任务/门禁/安装契约测试。测试边界及原生4K隔离链路见[发布验证记录](docs/validation.md)。
 
 推荐团队固定版本为 **v1.1.0**，增加真实素材与可校验获取入口。保留v1.0.0/v1.0.1历史，123条规范及其1.0.0版本/SHA不变；新批次锁定新Skill提交，不将旧工程证据的提交号手动改成新版本。
+
+工作分支 `codex/previs-pipeline-optimization` 增加上述固定SOP/提效模块；发布前为本地候选，不把它冒充已有的v1.1.0 Release。新原生渲染CLI增加必填 `--match-report`，先物理检查与全帧匹配预检，旧job/报告继续使用其原固定提交。验证范围见[提效模块验证](docs/optimization-validation.md)，不是任意客户视频自动复刻算法。

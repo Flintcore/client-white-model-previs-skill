@@ -8,13 +8,13 @@ from common import *
 def main():
     p=argparse.ArgumentParser();p.add_argument('--job',required=True);p.add_argument('--output',required=True)
     p.add_argument('--diagnostic-report',required=True)
+    p.add_argument('--match-report',required=True)
     args=p.parse_args(sys.argv[sys.argv.index('--')+1:] if '--' in sys.argv else [])
     job,root=load_job(args.job);scene=bpy.context.scene;blend=Path(bpy.data.filepath)
     if not blend.is_file():raise ValueError('Save an editable scene before rendering')
-    blend_hash=sha256(blend);qa=read_json(args.diagnostic_report)
-    if (not qa.get('passed') or qa.get('blend_sha256')!=blend_hash or qa.get('job_id')!=job['job_id']
-        or qa.get('standards_sha256')!=job['standards_sha256']):
-        raise ValueError('Current scene must pass actual independent engineering/physical QA first')
+    from render_ready import validate_render_ready
+    ready=validate_render_ready(args.job,blend,args.diagnostic_report,args.match_report)
+    blend_hash=ready['blend_sha256']
     r=job['render'];s=job['source'];t=job['timeline']
     from fractions import Fraction
     actual_fps=Fraction(str(scene.render.fps))/Fraction(str(scene.render.fps_base))
@@ -30,6 +30,9 @@ def main():
     rt=bool(getattr(scene.eevee,'use_raytracing',False))
     if r['dark_scene'] and not rt:raise ValueError('Dark scene requires ray tracing')
     out=Path(args.output).resolve()
+    out.relative_to(root)
+    if out==root or out.relative_to(root).parts[0] in {'inputs','delivery'}:
+        raise ValueError('Render output must be a separate job-local diagnostic/render directory')
     if out.exists() and any(out.iterdir()):raise ValueError('Use a new empty render directory; avoid mixing revisions')
     out.mkdir(parents=True,exist_ok=True)
     manifest={'schema':'client-white-model-render.v1','status':'RENDERING','job_id':job['job_id'],
@@ -37,6 +40,8 @@ def main():
         'engine':scene.render.engine,'resolution_percentage':100,'width':r['width'],'height':r['height'],
         'fps_num':s['fps_num'],'fps_den':s['fps_den'],'samples':64,'dark_scene':r['dark_scene'],
         'raytracing':rt,'frame_start':t['frame_start'],'frame_end':t['frame_end'],'completed':[],
+        'engineering_report_sha256':ready['engineering_report_sha256'],
+        'match_report_sha256':ready['match_report_sha256'],
         'executed_with':'Blender bpy actual renderer','upscaled':False}
     scene.render.image_settings.file_format='PNG';scene.render.image_settings.color_mode='RGB'
     start=time.monotonic()
@@ -51,6 +56,12 @@ def main():
             manifest['elapsed_seconds']=time.monotonic()-start;write_json(out/'render_manifest.json',manifest)
             print(f'ACTUAL_NATIVE_FRAME {frame}/{t["frame_end"]}',flush=True)
         if sha256(blend)!=blend_hash:raise ValueError('Input scene changed during render')
+        if (sha256(args.diagnostic_report)!=ready['engineering_report_sha256'] or
+                sha256(args.match_report)!=ready['match_report_sha256']):
+            raise ValueError('Frozen pre-render reports changed during render')
+        # Re-read evidence/artifacts as well: a stable report file is not proof
+        # that its referenced preview/observations remained unchanged.
+        validate_render_ready(args.job,blend,args.diagnostic_report,args.match_report)
         manifest['status']='COMPLETE';manifest['elapsed_seconds']=time.monotonic()-start
         manifest['average_seconds_per_frame']=manifest['elapsed_seconds']/len(manifest['completed'])
     except Exception:
