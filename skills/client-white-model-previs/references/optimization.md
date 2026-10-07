@@ -35,7 +35,7 @@ python -X utf8 "$S/pipeline.py" init --job WORK_JOB/job.json
 python -X utf8 "$S/pipeline.py" plan --job WORK_JOB/job.json
 python -X utf8 "$S/pipeline.py" start --job WORK_JOB/job.json --stage camera
 # 实际完成对应程序后使用start返回的TOKEN；不要填写想象的耗时。
-python -X utf8 "$S/pipeline.py" record --job WORK_JOB/job.json --token TOKEN --status passed --output WORK_JOB/analysis/camera.json
+python -X utf8 "$S/pipeline.py" record --job WORK_JOB/job.json --token TOKEN --status passed --output analysis/camera.json
 python -X utf8 "$S/pipeline.py" timing-summary --job WORK_JOB/job.json
 ```
 
@@ -50,6 +50,8 @@ python -X utf8 "$S/pipeline.py" timing-summary --job WORK_JOB/job.json
 ```
 
 path与inputs是job内可移植相对文件。配置权重文件也列入inputs；代码SHA每次读取验证，不接受仅声明latest/main。key包含运行时脚本SHA、job版本/源/模板/规格、当前算法/参数/inputs及依赖阶段的真实输出SHA。输出非空、完整文件hash相同才命中；文件存在、旧passed或半成品不够。
+
+`record --output/--report`支持job内相对路径（例如`analysis/camera.json`）或job内文件的绝对路径，不再额外加`WORK_JOB/`前缀。preview/render/media/review必须提供`--report`对应当前实际报告；preview会重算match报告，render还需`--output`记录实际渲染工程`.blend`且自动纳入全帧PNG，review只承接现有独立gate，不生成通过结论。
 
 失败用 `record --status failed --failed-ranges qa/failed-ranges.json --message '实际问题'`；JSON列表为`[{"start": 37, "end": 44, "reason": "源片需要补测/当前腿提前露出"}]`。plan只返回最多12段的短承接摘要，原始完整失败列表保留。更改输入后旧结果失效；首次新输入返回run，失败/损坏返回repair，依赖未完成返回blocked。
 
